@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FPAmed Box Index Tool — a Next.js 14 web app that lets FPAmed (forensic psychiatry expert witness firm) staff authenticate with Box, pick a case folder, and generate a formatted Excel document index. The Excel report is written back to the selected Box folder automatically.
 
-Core document processing logic lives in `python/manifest.py` (Box folder traversal + metadata extraction) and `python/report.py` (Excel generation). These are invoked as child processes from the Next.js API layer.
+Core document processing logic lives in `python/manifest.py` (Box folder traversal + metadata extraction), `python/enrich.py` (optional AI enrichment via Claude vision), and `python/report.py` (Excel generation). These are invoked as child processes from the Next.js API layer.
 
 ---
 
@@ -23,6 +23,7 @@ npx tsc --noEmit   # type-check without building
 **Python environment** — always use the local venv:
 ```bash
 .venv/bin/python3 python/manifest.py --token <tok> --folder-id <id> --output-dir /tmp/test
+ANTHROPIC_API_KEY=<key> .venv/bin/python3 python/enrich.py --manifest-file /tmp/test/slug_manifest.csv --token <tok>
 .venv/bin/python3 python/report.py --input-file /tmp/test/slug_manifest.csv --output-file /tmp/test/out.xlsx
 ```
 
@@ -47,7 +48,7 @@ Box OAuth2 authorization code flow. `/api/auth/login` redirects to Box, `/api/au
 
 Job state is a module-level `Map` attached to `global.__jobs`. **This must stay on `global`** — Next.js compiles each route in its own module context in dev mode, so a plain module-level `Map` in `src/lib/jobs.ts` would be invisible to other routes.
 
-Job pipeline: manifest.py → report.py → upload to Box → update job status to `complete` with `boxFileUrl`.
+Job pipeline: manifest.py → *(optional)* enrich.py → report.py → upload to Box → update job status to `complete` with `boxFileUrl`. The `enrich` flag is passed from the frontend checkbox via `POST /api/generate`.
 
 ### Python invocation
 `src/app/api/generate/route.ts` auto-detects the venv python at `.venv/bin/python3`, falling back to system `python3`. stdout/stderr lines are captured and appended to `job.log[]` (capped at 20 lines) for display in the UI. The last non-empty output line is surfaced as the error message on non-zero exit.
@@ -68,14 +69,16 @@ The `/api/auth/token` endpoint returns only the access token (never the refresh 
 
 ## Environment Variables
 
-All required. See `.env.local`:
+Box variables are required. Anthropic variables are required only when AI enrichment is used.
 
-| Variable | Purpose |
-|---|---|
-| `BOX_CLIENT_ID` | Box Custom App client ID |
-| `BOX_CLIENT_SECRET` | Box Custom App client secret |
-| `BOX_REDIRECT_URI` | Must match redirect URI registered in Box developer console |
-| `SESSION_SECRET` | 32+ char random string for iron-session cookie encryption |
+| Variable | Required | Purpose |
+|---|---|---|
+| `BOX_CLIENT_ID` | Yes | Box Custom App client ID |
+| `BOX_CLIENT_SECRET` | Yes | Box Custom App client secret |
+| `BOX_REDIRECT_URI` | Yes | Must match redirect URI registered in Box developer console |
+| `SESSION_SECRET` | Yes | 32+ char random string for iron-session cookie encryption |
+| `ANTHROPIC_API_KEY` | AI enrichment only | Anthropic API key |
+| `ANTHROPIC_MODEL` | AI enrichment only | Model ID (default: `claude-haiku-4-5-20251001`) |
 
 For local dev, `BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback`. The Box Custom App must also have `http://localhost:3000` added to its **CORS Domains** list in the Box developer console, or the Content Picker will show "A network error has occurred."
 
@@ -90,7 +93,8 @@ For local dev, `BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback`. The B
 | `src/lib/session.ts` | `SessionData` interface and `iron-session` options |
 | `src/app/api/generate/route.ts` | Job creation, Python subprocess orchestration, Box upload |
 | `python/manifest.py` | Modified from root `manifest.py` — accepts `--token`, `--folder-id`, `--output-dir` |
-| `python/report.py` | Modified from root `report.py` — accepts `--input-file`, `--output-file` |
+| `python/enrich.py` | AI enrichment — downloads each PDF from Box, renders first `MAX_PAGES` pages (default 3) via pymupdf, sends to Claude vision, writes `AI Date` and `AI Description` back to the manifest CSV |
+| `python/report.py` | Modified from root `report.py` — accepts `--input-file`, `--output-file`; uses `AI Date` over filename/Box metadata date when present; populates Notes column with `AI Description` |
 | `src/app/globals.css` | Contains Box Content Picker CSS overrides scoped to `#box-picker-container` |
 
 The root `manifest.py` and `report.py` are the original scripts with hardcoded constants — do not invoke these from the app. The `python/` versions are the ones wired to the API.

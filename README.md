@@ -7,7 +7,8 @@ A Next.js web app to generate formatted Excel document indexes from Box case fol
 1. Authenticate with Box via OAuth.
 2. Pick a case folder using the Box Content Picker.
 3. The app traverses the folder, extracts file metadata, and generates an Excel index report.
-4. The report is automatically uploaded back into the selected Box folder.
+4. Optionally, enable **AI enrichment** to extract a document date and brief description from the first pages of each PDF using Claude. Results populate the Document Date and Notes columns in the report.
+5. The report is automatically uploaded back into the selected Box folder.
 
 ## Local development
 
@@ -31,6 +32,10 @@ BOX_CLIENT_ID=your_box_client_id
 BOX_CLIENT_SECRET=your_box_client_secret
 BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback
 SESSION_SECRET=a-random-string-at-least-32-characters-long
+
+# Optional — required only if using AI enrichment
+ANTHROPIC_API_KEY=your_anthropic_api_key
+ANTHROPIC_MODEL=claude-haiku-4-5-20251001
 ```
 
 ### Run
@@ -60,6 +65,7 @@ In the Box developer console, your Custom App must have:
 ```
 python/
   manifest.py   # Box folder traversal and metadata extraction
+  enrich.py     # AI enrichment — extracts document date and description via Claude vision
   report.py     # Excel report generation
 src/
   app/
@@ -82,3 +88,5 @@ src/
 | `BOX_CLIENT_SECRET` | Box Custom App client secret |
 | `BOX_REDIRECT_URI` | Must match redirect URI registered in Box developer console |
 | `SESSION_SECRET` | 32+ character random string for session cookie encryption |
+| `ANTHROPIC_API_KEY` | Anthropic API key — required for AI enrichment |
+| `ANTHROPIC_MODEL` | Model ID for enrichment (default: `claude-haiku-4-5-20251001`) |
