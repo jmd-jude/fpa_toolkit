@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPAmed Document Index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #669966;
+      --green-dark: #4f7a4f;
+      --green-light:#e8f0e8;
+      --text:       #222222;
+      --muted:      #666666;
+      --border:     #d4e0d4;
+      --white:      #ffffff;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #f5f7f5;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--white);
+      border-bottom: 3px solid var(--green);
+      padding: 0 2rem;
+    }
+
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 0;
+    }
+
+
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      max-width: 560px;
+      width: 100%;
+      padding: 3rem 3.5rem;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 1rem;
+    }
+
+    .card h1 span { color: var(--green); }
+
+    .card p {
+      font-size: 0.97rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2.25rem;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: var(--green);
+      color: var(--white);
+      font-family: 'Open Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.85rem 2.25rem;
+      border-radius: 4px;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-btn:hover {
+      background: var(--green-dark);
+      box-shadow: 0 4px 14px rgba(102,153,102,0.35);
+    }
+
+    .cta-note {
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      color: #999;
+    }
+
+    /* ── How it works ── */
+    .steps {
+      display: flex;
+      gap: 0;
+      margin: 2.5rem 0 0;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .step {
+      flex: 1;
+      padding: 0 1.25rem;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0.5rem;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .step-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .step-label {
+      font-size: 0.82rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .step-desc {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem 2rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+    }
+
+    footer a { color: var(--green); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 560px) {
+      .card { padding: 2rem 1.5rem; }
+      .card h1 { font-size: 1.4rem; }
+      .steps { flex-direction: column; gap: 1.25rem; }
+      .step:not(:last-child)::after { display: none; }
+      .step { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <img src="logo.png" alt="FPAmed — Forensic Psychiatric Associates" style="height:44px;width:auto;" />
+    </div>
+  </header>
+
+  <main class="hero">
+    <div class="card">
+      <div class="badge">Internal Tool</div>
+      <h1>Generate a <span>case index</span><br/>in minutes.</h1>
+      <p>
+        Connect to your Box account, select a case folder, and get a formatted
+        Excel index — with AI-assisted document descriptions — written back to
+        Box automatically.
+      </p>
+      <a class="cta-btn" href="https://box-index-app-production.up.railway.app" target="_blank" rel="noopener">
+        Open the App &rarr;
+      </a>
+      <p class="cta-note">Sign in with your Box account to continue.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">Step 1</div>
+          <div class="step-label">Connect Box</div>
+          <div class="step-desc">Authorize once with your Box credentials.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 2</div>
+          <div class="step-label">Pick a folder</div>
+          <div class="step-desc">Browse to any case folder in Box.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 3</div>
+          <div class="step-label">Get the index</div>
+          <div class="step-desc">An Excel report is saved back to that folder.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 <a href="https://fpamed.com/" target="_blank" rel="noopener">Forensic Psychiatric Associates, LP</a>
+  </footer>
+
+</body>
+</html>

@@ -137,7 +137,7 @@ def write_report(case_root, sections, rows, output_file):
     ws.column_dimensions['B'].width = name_col_width
     ws.column_dimensions['C'].width = 10
     ws.column_dimensions['D'].width = 14
-    ws.column_dimensions['E'].width = 16
+    ws.column_dimensions['E'].width = 23
     ws.column_dimensions['F'].width = 12
     ws.column_dimensions['G'].width = 150
 
