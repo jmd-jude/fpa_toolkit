@@ -1,0 +1,5 @@
+boxsdk==3.9.2
+requests
+openpyxl
+streamlit
+pymupdf

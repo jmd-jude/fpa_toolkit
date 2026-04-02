@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Box Content Picker overrides ────────────────────────────────────────── */
+
+/* Larger item names in the file list */
+#box-picker-container .be-item-label {
+  font-size: 14px !important;
+}
+
+/* Footer buttons (X and checkmark icons) — bigger hit area */
+#box-picker-container .bcp-footer-actions button,
+#box-picker-container .bcp-footer-actions .btn {
+  width: 52px !important;
+  height: 44px !important;
+}
+
+/* Primary (Select checkmark) button — dark instead of Box blue */
+#box-picker-container .bcp-footer-actions .btn-primary {
+  background-color: #0f172a !important;
+  border-color: #0f172a !important;
+}
+
+#box-picker-container .bcp-footer-actions .btn-primary:hover {
+  background-color: #334155 !important;
+  border-color: #334155 !important;
+}
