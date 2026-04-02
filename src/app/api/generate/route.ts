@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { folderId, folderName } = body as { folderId: string; folderName: string };
+  const { folderId, folderName, enrich } = body as { folderId: string; folderName: string; enrich?: boolean };
 
   if (!folderId || !folderName) {
     return NextResponse.json({ error: 'folderId and folderName required' }, { status: 400 });
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   createJob(jobId, folderId, folderName);
 
   // Fire and forget — runs in background while response is sent
-  runJob(jobId, accessToken, folderId, folderName).catch((err) => {
+  runJob(jobId, accessToken, folderId, folderName, !!enrich).catch((err) => {
     updateJob(jobId, { status: 'error', error: String(err) });
   });
 
@@ -46,7 +46,8 @@ async function runJob(
   jobId: string,
   accessToken: string,
   folderId: string,
-  folderName: string
+  folderName: string,
+  enrich: boolean
 ) {
   updateJob(jobId, { status: 'running', progress: 'Starting manifest generation...' });
 
@@ -80,7 +81,23 @@ async function runJob(
     const slug = manifestFile.replace('_manifest.csv', '');
     const reportFile = path.join(tmpDir, `${slug}_report.xlsx`);
 
-    // Step 2 — report
+    // Step 2 (optional) — AI enrichment
+    if (enrich) {
+      updateJob(jobId, { progress: 'Running AI enrichment...' });
+      await runPython(pythonBin, [
+        path.join(pythonDir, 'enrich.py'),
+        '--manifest-file', path.join(tmpDir, manifestFile),
+        '--token', accessToken,
+        '--model', process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001',
+      ], (line) => {
+        if (!line.trim()) return;
+        appendLog(jobId, line.trim());
+        const m = line.match(/\[(\d+)\/(\d+)\]/);
+        if (m) updateJob(jobId, { progress: `AI enrichment: ${m[1]} of ${m[2]} files...` });
+      }, { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '' });
+    }
+
+    // Step 3 — report
     updateJob(jobId, { progress: 'Generating Excel report...' });
     await runPython(pythonBin, [
       path.join(pythonDir, 'report.py'),
@@ -90,7 +107,7 @@ async function runJob(
       if (line.trim()) appendLog(jobId, line.trim());
     });
 
-    // Step 3 — upload to Box
+    // Step 4 — upload to Box
     updateJob(jobId, { progress: 'Uploading report to Box...' });
     const dateStamp = new Date().toISOString().slice(0, 10);
     const uploadName = `${folderName}_index_${dateStamp}.xlsx`;
@@ -111,10 +128,11 @@ async function runJob(
 function runPython(
   python: string,
   args: string[],
-  onLine?: (line: string) => void
+  onLine?: (line: string) => void,
+  extraEnv?: Record<string, string>
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(python, args);
+    const proc = spawn(python, args, extraEnv ? { env: { ...process.env, ...extraEnv } } : undefined);
     const outputLines: string[] = [];
 
     proc.stdout.on('data', (chunk: Buffer) => {

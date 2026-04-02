@@ -139,7 +139,7 @@ def write_report(case_root, sections, rows, output_file):
     ws.column_dimensions['D'].width = 14
     ws.column_dimensions['E'].width = 16
     ws.column_dimensions['F'].width = 12
-    ws.column_dimensions['G'].width = 30
+    ws.column_dimensions['G'].width = 100
 
     case_name = case_root.upper()
     total_files = sum(1 for r in rows if r['Extension'] not in ('', 'no extension'))
@@ -234,7 +234,7 @@ def write_report(case_root, sections, rows, output_file):
                 else:
                     section_na += 1
 
-                doc_date = parse_date_from_filename(row['Name']) or row.get('Modified', '')
+                doc_date = row.get('AI Date') or parse_date_from_filename(row['Name']) or row.get('Modified', '')
                 size = row.get('Size (KB)', '')
                 if size and size != 'N/A':
                     kb = float(size)
@@ -242,16 +242,16 @@ def write_report(case_root, sections, rows, output_file):
 
                 file_type = row.get('Extension', '').lstrip('.').upper() or '—'
                 row_fill = LTGRAY if item_num % 2 == 1 else PatternFill()
-                vals = [item_num, row['Name'], file_type, page_count, doc_date, size, '']
+                vals = [item_num, row['Name'], file_type, page_count, doc_date, size, row.get('AI Description', '')]
 
                 for col, val in enumerate(vals, 1):
                     c = ws.cell(row=current_row, column=col, value=val)
                     c.fill = row_fill
                     c.border = thin_border()
                     c.alignment = Alignment(
-                        horizontal='center' if col != 2 else 'left',
+                        horizontal='center' if col not in (2, 7) else 'left',
                         vertical='center',
-                        wrap_text=(col == 2)
+                        wrap_text=(col in (2, 7))
                     )
                     if col == 2:
                         file_url = row.get('File URL', '')

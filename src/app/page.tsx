@@ -50,6 +50,7 @@ export default function Home() {
   const [job, setJob] = useState<JobStatus | null>(null);
   const [generating, setGenerating] = useState(false);
   const [pickerKey, setPickerKey] = useState(0);
+  const [enrichAI, setEnrichAI] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const pickerInstanceRef = useRef<ReturnType<typeof window.Box.ContentPicker.prototype.constructor> | null>(null);
 
@@ -119,7 +120,7 @@ export default function Home() {
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folderId: selectedFolder.id, folderName: selectedFolder.name }),
+      body: JSON.stringify({ folderId: selectedFolder.id, folderName: selectedFolder.name, enrich: enrichAI }),
     });
 
     if (!res.ok) {
@@ -230,13 +231,24 @@ export default function Home() {
                     <p className="font-semibold">{selectedFolder.name}</p>
                   </div>
                 </div>
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="bg-white text-slate-900 px-6 py-2.5 rounded-lg font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Generate Index
-                </button>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={enrichAI}
+                      onChange={(e) => setEnrichAI(e.target.checked)}
+                      className="w-4 h-4 rounded accent-white cursor-pointer"
+                    />
+                    AI enrichment
+                  </label>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="bg-white text-slate-900 px-6 py-2.5 rounded-lg font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Generate Index
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -244,7 +256,7 @@ export default function Home() {
 
         {/* ── State 3: Job running / complete / error ── */}
         {auth && job && (
-          <div className="w-full max-w-lg text-center">
+          <div className="w-full max-w-2xl text-center">
             {(job.status === 'queued' || job.status === 'running') && (
               <div>
                 <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-6" />
