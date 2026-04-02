@@ -161,19 +161,19 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-slate-900 text-white px-8 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">FPAmed Box Index Tool</h1>
-          <p className="text-slate-400 text-sm">Document Index Generator</p>
+      <header className="text-white px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#669966' }}>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="FPAmed" className="h-8 w-auto brightness-0 invert" />
+          <p className="text-white/80 text-sm hidden sm:block">Document Index Generator</p>
         </div>
         {auth && (
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-300">
+            <span className="text-white/80">
               {auth.userName || auth.userEmail}
             </span>
             <button
               onClick={handleLogout}
-              className="text-slate-400 hover:text-white underline transition-colors"
+              className="text-white/70 hover:text-white underline transition-colors"
             >
               Sign out
             </button>
@@ -198,7 +198,10 @@ export default function Home() {
             </div>
             <a
               href="/api/auth/login"
-              className="inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
+              className="inline-block text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              style={{ backgroundColor: '#669966' }}
+              onMouseOver={e => (e.currentTarget.style.backgroundColor = '#4f7a4f')}
+              onMouseOut={e => (e.currentTarget.style.backgroundColor = '#669966')}
             >
               Connect Box Account
             </a>
@@ -217,7 +220,7 @@ export default function Home() {
             />
 
             {selectedFolder && (
-              <div className="mt-6 flex items-center justify-between bg-slate-900 text-white rounded-lg px-5 py-4">
+              <div className="mt-6 flex items-center justify-between text-white rounded-lg px-5 py-4" style={{ backgroundColor: '#669966' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,14 +228,14 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 uppercase tracking-wide font-medium mb-0.5">
+                    <p className="text-xs text-white/70 uppercase tracking-wide font-medium mb-0.5">
                       Selected folder
                     </p>
                     <p className="font-semibold">{selectedFolder.name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-sm text-white/80 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={enrichAI}
@@ -259,7 +262,7 @@ export default function Home() {
           <div className="w-full max-w-2xl text-center">
             {(job.status === 'queued' || job.status === 'running') && (
               <div>
-                <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-6" />
+                <div className="w-12 h-12 border-4 border-slate-200 rounded-full animate-spin mx-auto mb-6" style={{ borderTopColor: '#669966' }} />
                 <h2 className="text-xl font-semibold text-slate-800 mb-2">Generating index…</h2>
                 <p className="text-slate-500 text-sm mb-4">{job.progress ?? 'Working…'}</p>
                 {job.log && job.log.length > 0 && (
@@ -291,7 +294,10 @@ export default function Home() {
                       href={job.boxFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-700 transition-colors"
+                      className="text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+                      style={{ backgroundColor: '#669966' }}
+                      onMouseOver={e => (e.currentTarget.style.backgroundColor = '#4f7a4f')}
+                      onMouseOut={e => (e.currentTarget.style.backgroundColor = '#669966')}
                     >
                       Open in Box
                     </a>

@@ -16,13 +16,13 @@
   height: 44px !important;
 }
 
-/* Primary (Select checkmark) button — dark instead of Box blue */
+/* Primary (Select checkmark) button — FPAmed green instead of Box blue */
 #box-picker-container .bcp-footer-actions .btn-primary {
-  background-color: #0f172a !important;
-  border-color: #0f172a !important;
+  background-color: #669966 !important;
+  border-color: #669966 !important;
 }
 
 #box-picker-container .bcp-footer-actions .btn-primary:hover {
-  background-color: #334155 !important;
-  border-color: #334155 !important;
+  background-color: #4f7a4f !important;
+  border-color: #4f7a4f !important;
 }

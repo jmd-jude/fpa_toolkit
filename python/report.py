@@ -82,7 +82,7 @@ def write_duplicates_sheet(wb, rows):
     ws.column_dimensions['A'].width = 45
     ws.column_dimensions['B'].width = 10
     ws.column_dimensions['C'].width = 12
-    ws.column_dimensions['D'].width = 65
+    ws.column_dimensions['D'].width = 100
 
     headers = ['FILE NAME', 'TYPE', 'SIZE', 'FOLDER PATH']
     for col, h in enumerate(headers, 1):
