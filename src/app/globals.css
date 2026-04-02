@@ -14,6 +14,10 @@
 #box-picker-container .bcp-footer-actions .btn {
   width: 52px !important;
   height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
 }
 
 /* Primary (Select checkmark) button — FPAmed green instead of Box blue */
