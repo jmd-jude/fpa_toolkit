@@ -77,12 +77,13 @@ export default function Home() {
 
     const picker = new window.Box.ContentPicker();
     pickerInstanceRef.current = picker;
-    picker.show('0', auth.accessToken, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (picker as any).show('0', auth.accessToken, {
       container: '#box-picker-container',
       type: 'folder',
       maxSelectable: 1,
       logoUrl: '/logo.png',
-      onChoose: (items) => {
+      onChoose: (items: { id: string; name: string }[]) => {
         const folder = items[0];
         setSelectedFolder({ id: folder.id, name: folder.name });
       },
