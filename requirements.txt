@@ -1,4 +1,4 @@
 requests
 openpyxl
 pymupdf
-boxsdk
+boxsdk==3.9.2
