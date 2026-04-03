@@ -283,6 +283,21 @@ def write_report(case_root, sections, rows, output_file):
         ws.row_dimensions[current_row].height = 16
         current_row += 2
 
+    # Legend block
+    current_row += 1
+    ws.merge_cells(f'A{current_row}:G{current_row}')
+    legend = ws[f'A{current_row}']
+    legend.value = (
+        'NOTES ON DOCUMENT DATE: Date reflects the date extracted by AI directly from the document '
+        '(PDF files only). For non-PDF files (TXT, DOCX, HTML, etc.) and any PDF where AI extraction '
+        'was unsuccessful, the date shown is the file\u2019s last-modified date in Box, which typically '
+        'reflects when the file was uploaded rather than the document\u2019s own date.'
+    )
+    legend.fill = LTGRAY
+    legend.font = Font(italic=True, size=9, color='555555')
+    legend.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True, indent=1)
+    ws.row_dimensions[current_row].height = 42
+
     write_duplicates_sheet(wb, rows)
     wb.save(output_file)
     print(f'Report saved → {output_file}', flush=True)
