@@ -14,6 +14,7 @@ import argparse
 import csv
 import threading
 import concurrent.futures
+import time
 import requests
 
 BOX_EXTRACT_URL = "https://api.box.com/2.0/ai/extract_structured"
@@ -67,7 +68,7 @@ def call_box_ai(token: str, file_id: str, model: str) -> dict:
             "long_text": {"model": model},
         },
     }
-    response = requests.post(BOX_EXTRACT_URL, headers=headers, json=payload, timeout=60)
+    response = requests.post(BOX_EXTRACT_URL, headers=headers, json=payload, timeout=120)
     response.raise_for_status()
     answer = response.json().get("answer", {})
     return {
@@ -77,11 +78,29 @@ def call_box_ai(token: str, file_id: str, model: str) -> dict:
 
 
 def enrich_row(token: str, model: str, row: dict) -> dict:
-    try:
-        return call_box_ai(token, row["File ID"], model)
-    except Exception as e:
-        print(f"  Warning: enrichment failed for {row['Name']}: {e}", flush=True)
-        return {"ai_date": "", "ai_description": ""}
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            return call_box_ai(token, row["File ID"], model)
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code if e.response is not None else "?"
+            last_err = f"HTTP {status}"
+            if e.response is not None and e.response.status_code == 429:
+                wait = 10 * attempt
+                print(f"  Rate limited — waiting {wait}s before retry {attempt}/3 for {row['Name']}", flush=True)
+                time.sleep(wait)
+            else:
+                break  # non-retriable HTTP error
+        except requests.exceptions.Timeout:
+            last_err = "timeout"
+            wait = 5 * attempt
+            print(f"  Timeout — waiting {wait}s before retry {attempt}/3 for {row['Name']}", flush=True)
+            time.sleep(wait)
+        except Exception as e:
+            last_err = str(e)
+            break
+    print(f"  Warning: enrichment failed for {row['Name']}: {last_err}", flush=True)
+    return {"ai_date": "", "ai_description": "", "_failed": True}
 
 
 def main():
@@ -89,7 +108,7 @@ def main():
     parser.add_argument("--manifest-file", required=True, help="Path to *_manifest.csv (will be overwritten)")
     parser.add_argument("--token", required=True, help="Box access token")
     parser.add_argument("--model", default="google__gemini_2_5_pro", help="Box AI model ID")
-    parser.add_argument("--workers", type=int, default=10, help="Parallel API workers")
+    parser.add_argument("--workers", type=int, default=5, help="Parallel API workers")
     args = parser.parse_args()
 
     with open(args.manifest_file, newline="", encoding="utf-8") as f:
@@ -102,13 +121,15 @@ def main():
     row_by_id = {r["File ID"]: r for r in rows}
     counter = [0]
     lock = threading.Lock()
+    failures = []
 
     def process(row):
         result = enrich_row(args.token, args.model, row)
         with lock:
             counter[0] += 1
             n = counter[0]
-        print(f"  [{n}/{total}] {row['Name']} → {result['ai_date'] or 'no date'}", flush=True)
+        status = "FAILED" if result.get("_failed") else (result['ai_date'] or 'no date')
+        print(f"  [{n}/{total}] {row['Name']} → {status}", flush=True)
         return row["File ID"], result
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
@@ -117,6 +138,8 @@ def main():
             file_id, result = future.result()
             row_by_id[file_id]["AI Date"] = result["ai_date"]
             row_by_id[file_id]["AI Description"] = result["ai_description"]
+            if result.get("_failed"):
+                failures.append(row_by_id[file_id]["Name"])
 
     for row in rows:
         row.setdefault("AI Date", "")
@@ -128,7 +151,13 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"Enrichment complete → {args.manifest_file}", flush=True)
+    succeeded = total - len(failures)
+    if failures:
+        print(f"Enrichment complete: {succeeded}/{total} succeeded, {len(failures)} failed:", flush=True)
+        for name in failures:
+            print(f"  FAILED: {name}", flush=True)
+    else:
+        print(f"Enrichment complete: {total}/{total} succeeded → {args.manifest_file}", flush=True)
 
 
 if __name__ == "__main__":

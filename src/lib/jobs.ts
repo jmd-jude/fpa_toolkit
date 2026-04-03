@@ -43,6 +43,6 @@ export function updateJob(id: string, updates: Partial<Job>): void {
 export function appendLog(id: string, line: string): void {
   const job = jobs.get(id);
   if (!job) return;
-  const log = [...(job.log ?? []), line].slice(-20);
+  const log = [...(job.log ?? []), line].slice(-200);
   jobs.set(id, { ...job, log });
 }
