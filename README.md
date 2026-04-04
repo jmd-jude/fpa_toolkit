@@ -17,7 +17,9 @@ A Next.js web app for FPAmed staff to generate formatted Excel reports from Box 
 1. Authenticate with Box via OAuth.
 2. Pick a deposition transcript PDF using the Box Content Picker.
 3. The app processes the transcript page by page using Box AI, detecting topic boundaries and extracting subject labels, summaries, and legal significance notes.
-4. An Excel summary (PAGE / SUBJECT / SUMMARY / SIGNIFICANCE) is automatically uploaded to the same Box folder as the source transcript.
+4. Two outputs are automatically uploaded to the same Box folder as the source transcript:
+   - **Excel summary** (PAGE / SUBJECT / SUMMARY / SIGNIFICANCE columns)
+   - **Merged PDF** — a clickable summary table prepended to the original transcript, with each page-number cell hotlinked directly to that page in the document
 
 Preamble and certification pages are automatically detected and skipped. Processing a 300-page transcript takes approximately 10–15 minutes at 5 parallel workers.
 
@@ -73,6 +75,7 @@ In the Box developer console, your Custom App must have:
 # Deposition Summary
 .venv/bin/python3 python/depo_summary.py --file-id <id> --token <tok> --output-dir /tmp/depo_test
 .venv/bin/python3 python/depo_report.py --input-file /tmp/depo_test/slug_depo_topics.csv --output-file /tmp/depo_test/summary.xlsx
+.venv/bin/python3 python/depo_pdf_generator.py --transcript-path /tmp/depo_test/slug_transcript.pdf --csv-path /tmp/depo_test/slug_depo_topics.csv --output-path /tmp/depo_test/slug_Summarized.pdf
 
 # Test on first 10 pages only (faster iteration)
 .venv/bin/python3 python/depo_summary.py --file-id <id> --token <tok> --output-dir /tmp/depo_test --page-end 10
@@ -95,9 +98,10 @@ python/
   manifest.py        # Box folder traversal and metadata extraction
   enrich.py          # AI enrichment — document date and description via Box AI
   report.py          # Excel report generation for document index
-  depo_summary.py    # Page-by-page deposition extraction via Box AI
-  depo_report.py     # Excel report generation for deposition summary
-  depo_experiment.py # Original proof-of-concept script (do not invoke from app)
+  depo_summary.py      # Page-by-page deposition extraction via Box AI; saves transcript PDF to tmpdir
+  depo_report.py       # Excel report generation for deposition summary
+  depo_pdf_generator.py # Merged PDF — summary table with GoTo links prepended to transcript
+  depo_experiment.py   # Original proof-of-concept script (do not invoke from app)
 src/
   app/
     api/
