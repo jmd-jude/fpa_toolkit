@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { sessionOptions, SessionData } from '@/lib/session';
 import { getFreshToken, uploadToBox } from '@/lib/box';
 import { createJob, updateJob, appendLog } from '@/lib/jobs';
+import { recordUsage } from '@/lib/usage';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import os from 'os';
@@ -48,7 +49,8 @@ export async function POST(request: NextRequest) {
   const jobId = crypto.randomUUID();
   createJob(jobId, parentFolderId, fileName, 'deposition_summary');
 
-  runJob(jobId, accessToken, fileId, fileName, parentFolderId).catch((err) => {
+  const userEmail = session.userEmail;
+  runJob(jobId, accessToken, fileId, fileName, parentFolderId, userEmail).catch((err) => {
     appendLog(jobId, `ERROR: ${String(err)}`);
     updateJob(jobId, { status: 'error', error: String(err) });
   });
@@ -61,9 +63,11 @@ async function runJob(
   accessToken: string,
   fileId: string,
   fileName: string,
-  parentFolderId: string
+  parentFolderId: string,
+  userEmail?: string
 ) {
   updateJob(jobId, { status: 'running', progress: 'Detecting testimony pages...' });
+  const startedAt = Date.now();
 
   const tmpDir = path.join(os.tmpdir(), `box-depo-${jobId}`);
   await fs.mkdir(tmpDir, { recursive: true });
@@ -74,6 +78,7 @@ async function runJob(
     const pythonBin = await fs.access(venvPython).then(() => venvPython).catch(() => 'python3');
 
     // Step 1 — depo_summary.py
+    let pagesProcessed = 0;
     await runPython(pythonBin, [
       path.join(pythonDir, 'depo_summary.py'),
       '--file-id', fileId,
@@ -84,7 +89,10 @@ async function runJob(
       if (!line.trim()) return;
       appendLog(jobId, line.trim());
       const m = line.match(/\[(\d+)\/(\d+)\]\s+page\s+(\d+)/i);
-      if (m) updateJob(jobId, { progress: `Processing page ${m[3]} of ${m[2]}...` });
+      if (m) {
+        pagesProcessed = parseInt(m[2], 10);
+        updateJob(jobId, { progress: `Processing page ${m[3]} of ${m[2]}...` });
+      }
       if (line.includes('Auto-detected testimony start')) {
         updateJob(jobId, { progress: line.trim() });
       }
@@ -140,12 +148,21 @@ async function runJob(
       pdfBuffer,
     );
 
+    const durationSeconds = Math.round((Date.now() - startedAt) / 1000);
     updateJob(jobId, {
       status: 'complete',
       completedAt: new Date().toISOString(),
       boxFileUrl,
       boxPdfUrl,
       progress: 'Done',
+    });
+    await recordUsage({
+      jobId,
+      pipeline: 'deposition_summary',
+      fileName,
+      pagesProcessed,
+      durationSeconds,
+      userEmail,
     });
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });

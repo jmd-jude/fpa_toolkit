@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { sessionOptions, SessionData } from '@/lib/session';
 import { getFreshToken, uploadToBox } from '@/lib/box';
 import { createJob, updateJob, appendLog } from '@/lib/jobs';
+import { recordUsage } from '@/lib/usage';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import os from 'os';
@@ -35,7 +36,8 @@ export async function POST(request: NextRequest) {
   createJob(jobId, folderId, folderName, 'document_index');
 
   // Fire and forget — runs in background while response is sent
-  runJob(jobId, accessToken, folderId, folderName, !!enrich).catch((err) => {
+  const userEmail = session.userEmail;
+  runJob(jobId, accessToken, folderId, folderName, !!enrich, userEmail).catch((err) => {
     updateJob(jobId, { status: 'error', error: String(err) });
   });
 
@@ -47,9 +49,11 @@ async function runJob(
   accessToken: string,
   folderId: string,
   folderName: string,
-  enrich: boolean
+  enrich: boolean,
+  userEmail?: string
 ) {
   updateJob(jobId, { status: 'running', progress: 'Starting manifest generation...' });
+  const startedAt = Date.now();
 
   const tmpDir = path.join(os.tmpdir(), `box-index-${jobId}`);
   await fs.mkdir(tmpDir, { recursive: true });
@@ -61,6 +65,7 @@ async function runJob(
 
     // Step 1 — manifest
     updateJob(jobId, { progress: 'Scanning Box folder...' });
+    let filesProcessed = 0;
     await runPython(pythonBin, [
       path.join(pythonDir, 'manifest.py'),
       '--token', accessToken,
@@ -70,7 +75,10 @@ async function runJob(
       if (!line.trim()) return;
       appendLog(jobId, line.trim());
       const m = line.match(/Processing file (\d+)/i);
-      if (m) updateJob(jobId, { progress: `Processing file ${m[1]}...` });
+      if (m) {
+        filesProcessed = parseInt(m[1], 10);
+        updateJob(jobId, { progress: `Processing file ${m[1]}...` });
+      }
     });
 
     // Find the manifest CSV
@@ -114,11 +122,20 @@ async function runJob(
     const fileBuffer = await fs.readFile(reportFile);
     const boxFileUrl = await uploadToBox(accessToken, folderId, uploadName, fileBuffer);
 
+    const durationSeconds = Math.round((Date.now() - startedAt) / 1000);
     updateJob(jobId, {
       status: 'complete',
       completedAt: new Date().toISOString(),
       boxFileUrl,
       progress: 'Done',
+    });
+    await recordUsage({
+      jobId,
+      pipeline: 'document_index',
+      fileName: folderName,
+      filesProcessed,
+      durationSeconds,
+      userEmail,
     });
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
