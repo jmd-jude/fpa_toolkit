@@ -208,27 +208,54 @@ export default function Home() {
       <main className={`flex-1 flex flex-col ${auth && pipeline && !job ? '' : 'items-center justify-center px-8 py-12'}`}>
         {/* ── State 1: Unauthenticated ── */}
         {!auth && (
-          <div className="text-center max-w-md">
-            <div className="mb-8">
-              <div className="w-16 h-16 bg-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-                </svg>
-              </div>
-              <p className="text-slate-500 text-sm">
-                Generate document indexes and deposition summaries from Box.
-              </p>
+          <div className="w-full max-w-2xl">
+            <div className="text-center mb-10">
+              <h1 className="text-2xl font-semibold text-slate-800 mb-2">FPAmed Document Tools</h1>
+              <p className="text-slate-500 text-sm">AI-assisted document workflows, connected to your Box account.</p>
             </div>
-            <a
-              href="/api/auth/login"
-              className="inline-block text-white px-6 py-3 rounded-lg font-medium transition-colors"
-              style={{ backgroundColor: '#669966' }}
-              onMouseOver={e => (e.currentTarget.style.backgroundColor = '#4f7a4f')}
-              onMouseOut={e => (e.currentTarget.style.backgroundColor = '#669966')}
-            >
-              Connect Box Account
-            </a>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+              <div className="border border-slate-200 rounded-xl p-6 bg-white">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#eaf2ea' }}>
+                  <svg className="w-5 h-5" style={{ color: '#669966' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-2">Document Index</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Select a case folder in Box. Get back a formatted Excel index — file names, page counts,
+                  AI-extracted dates and descriptions — written back to that folder automatically.
+                </p>
+              </div>
+
+              <div className="border border-slate-200 rounded-xl p-6 bg-white">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#eaf2ea' }}>
+                  <svg className="w-5 h-5" style={{ color: '#669966' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-2">Deposition Summary</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Upload a deposition PDF. Get back a clickable topic summary prepended directly to the
+                  transcript — subjects, key testimony, legal significance — plus an Excel report. Both saved to Box.
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <a
+                href="/api/auth/login"
+                className="inline-block text-white px-8 py-3 rounded-lg font-medium transition-colors"
+                style={{ backgroundColor: '#669966' }}
+                onMouseOver={e => (e.currentTarget.style.backgroundColor = '#4f7a4f')}
+                onMouseOut={e => (e.currentTarget.style.backgroundColor = '#669966')}
+              >
+                Connect Box Account
+              </a>
+              <p className="mt-3 text-xs text-slate-400">Sign in with your Box credentials to continue.</p>
+            </div>
           </div>
         )}
 
@@ -250,8 +277,8 @@ export default function Home() {
                 </div>
                 <h3 className="font-semibold text-slate-800 mb-2">Document Index</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  Generate a formatted Excel index of all files in a Box folder, with page counts,
-                  document dates, and duplicate detection.
+                  Select a case folder in Box. Get back a formatted Excel index — file names, page counts,
+                  AI-extracted dates and descriptions — written back to that folder automatically.
                 </p>
                 <p className="mt-4 text-sm font-medium" style={{ color: '#669966' }}>
                   Select a folder →
@@ -271,8 +298,8 @@ export default function Home() {
                 </div>
                 <h3 className="font-semibold text-slate-800 mb-2">Deposition Summary</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  Generate a structured page-by-page summary of a deposition transcript,
-                  organized by topic with page citations.
+                  Upload a deposition PDF. Get back a clickable topic summary prepended directly to the
+                  transcript — subjects, key testimony, legal significance — plus an Excel report. Both saved to Box.
                 </p>
                 <p className="mt-4 text-sm font-medium" style={{ color: '#669966' }}>
                   Select a transcript →
