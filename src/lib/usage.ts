@@ -91,7 +91,7 @@ async function sendDiscord(event: UsageEvent): Promise<void> {
     await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: `✅ **Job Complete**\n${lines.join('\n')}` }),
+      body: JSON.stringify({ content: `**-- Job Complete --**\n${lines.join('\n')}` }),
     });
   } catch (err) {
     console.error('[usage] Discord notify failed:', err);

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPAmed — Where Things Stand</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #669966;
+      --green-dark:  #4f7a4f;
+      --green-light: #e8f0e8;
+      --text:        #1a1a1a;
+      --muted:       #666;
+      --border:      #d4e0d4;
+      --white:       #ffffff;
+      --bg:          #f5f7f5;
+      --dark:        #1a2a1a;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Open Sans', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    #deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+
+    .slide-bg-white { background: var(--white); }
+    .slide-bg-light { background: var(--bg); }
+    .slide-bg-dark  { background: var(--dark); }
+
+    .logo-bar {
+      position: absolute;
+      top: 1.5rem;
+      left: 2rem;
+      z-index: 10;
+    }
+    .logo-bar img { height: 32px; width: auto; }
+
+    .slide-counter {
+      position: absolute;
+      bottom: 1.4rem;
+      right: 2rem;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    .slide-bg-dark .slide-counter { color: rgba(255,255,255,0.2); }
+
+    #dots {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dot.active { background: var(--green); transform: scale(1.4); }
+
+    #nav-prev, #nav-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      color: var(--green-dark);
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    #nav-prev { left: 1.25rem; }
+    #nav-next { right: 1.25rem; }
+    #nav-prev:hover, #nav-next:hover {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* ── Layout helpers ── */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem 5rem 3.5rem;
+      max-width: 980px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .slide-content.left { align-items: flex-start; }
+    .slide-content.split {
+      flex-direction: row;
+      align-items: center;
+      gap: 4rem;
+    }
+    .split-text { flex: 1; }
+    .split-visual { flex: 1.2; }
+
+    .eyebrow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+    .eyebrow-white { color: rgba(255,255,255,0.4); }
+
+    .divider {
+      width: 36px; height: 3px;
+      background: var(--green);
+      border-radius: 2px;
+      margin: 1.1rem 0;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--white);
+    }
+    h1 span { color: var(--green); }
+
+    h2 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text);
+    }
+    h2.white { color: var(--white); }
+
+    .lede {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.65;
+      margin-top: 1rem;
+    }
+
+    .note {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 1.1rem;
+      max-width: 480px;
+    }
+
+    /* ── Two-layer diagram ── */
+    .layers {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: 100%;
+      max-width: 700px;
+      margin-top: 2rem;
+    }
+    .layer {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.4rem 2rem;
+      border: 1px solid var(--border);
+      background: var(--white);
+    }
+    .layer:first-child { border-radius: 10px 10px 0 0; border-bottom: none; }
+    .layer:last-child  { border-radius: 0 0 10px 10px; }
+    .layer-pct {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+      width: 5rem;
+      flex-shrink: 0;
+    }
+    .layer-body h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .layer-body p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .layer-tag {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .tag-built {
+      background: var(--green);
+      color: var(--white);
+    }
+    .tag-daily {
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Workflow cards ── */
+    .workflow-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.25rem;
+      width: 100%;
+      margin-top: 2rem;
+    }
+    .wf-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 1.6rem;
+      background: var(--white);
+    }
+    .wf-card.dim { opacity: 0.35; }
+    .wf-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+    .wf-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .wf-card p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .wf-stat {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--green-dark);
+      background: var(--green-light);
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      border-radius: 20px;
+    }
+
+    /* ── Screenshot ── */
+    .screenshot-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+    }
+    .screenshot-wrap img { width: 100%; display: block; }
+
+    /* ── Stats ── */
+    .stat-row {
+      display: flex;
+      gap: 4rem;
+      margin-top: 2rem;
+    }
+    .stat-block { text-align: center; }
+    .big-stat {
+      font-size: 3.8rem;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+    .big-stat sub { font-size: 1.4rem; vertical-align: baseline; }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Discussion items ── */
+    .talk-list {
+      list-style: none;
+      margin-top: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 660px;
+    }
+    .talk-list li {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .talk-num {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--green-light);
+      border: 1px solid var(--border);
+      color: var(--green-dark);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+    }
+    .talk-text {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.6;
+      font-weight: 600;
+    }
+    .talk-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 0.2rem;
+      line-height: 1.5;
+    }
+
+    .cover-meta {
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 2.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 1. COVER -->
+  <div class="slide slide-bg-dark active" data-index="0">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">1 / 8</div>
+    <div class="slide-content" style="text-align:center;">
+      <div class="eyebrow eyebrow-white">Engagement Update</div>
+      <h1 class="hero-title">FPAmed<br/><span>AI Workflows</span></h1>
+      <p class="subtitle" style="color:white;">Box Platform &nbsp;&middot;&nbsp; April 2026</p>
+      <div class="cover-meta">Confidential</div>
+    </div>
+  </div>
+
+  <!-- 2. THE TWO LAYERS -->
+  <div class="slide slide-bg-light" data-index="1">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">2 / 7</div>
+    <div class="slide-content" style="max-width:780px;">
+      <!-- <div class="eyebrow">First, some context</div> -->
+      <h2 style="text-align:center;">Box Enterprise Advanced is two platforms.</h2>
+      <div class="layers">
+        <div class="layer">
+          <div class="layer-pct">80%</div>
+          <div class="layer-body">
+            <h4>The web app</h4>
+            <p>File storage, retrieval, on-demand AI Q&amp;A. Where most Box customers interact day to day.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-pct">20%</div>
+          <div class="layer-body">
+            <h4>Developer platform</h4>
+            <p>Custom apps built on Box APIs. Automated pipelines, structured output. Already in the subscription. Most customers never touch it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. WHERE WE GOT STUCK -->
+  <div class="slide slide-bg-white" data-index="2">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">3 / 7</div>
+    <div class="slide-content left" style="max-width:780px;">
+      <div class="eyebrow">Use-Case & Value Alignment</div>
+      <h2>The web app is the right tool for most day to day user activities.</h2>
+      <div class="divider"></div>
+      <ul class="talk-list">
+        <li><div class="talk-num">✓</div><div><div class="talk-text">On-demand and ad-hoc AI questions against case documents</div></div></li>
+        <li><div class="talk-num">✓</div><div><div class="talk-text">File storage, retrieval, expert collaboration</div></div></li>
+        <li><div class="talk-num">✓</div><div><div class="talk-text">AI Studio agents for the experts — report drafting, case Q&amp;A</div></div></li>
+        <li><div class="talk-num">✗</div><div><div class="talk-text">Custom automated pipelines — hundreds of pages, thousands of files, structured outputs, results saved to Box without manual steps...</div><div class="talk-sub">Box Consulting is two calls in, no recommendation yet.</div></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4. WHAT'S RUNNING -->
+  <div class="slide slide-bg-white" data-index="3">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">4 / 7</div>
+    <div class="slide-content" style="max-width:940px;">
+      <div class="eyebrow">Development Pivot</div>
+      <h2 style="text-align:center;">Two (beta) workflows, built last week.</h2>
+      <div class="workflow-row">
+        <div class="wf-card">
+          <div class="wf-num">Workflow 1</div>
+          <h3>Document Index</h3>
+          <p>Pick a case folder. AI-extracted dates and descriptions for every PDF. Excel index files back to Box automatically.</p>
+        </div>
+        <div class="wf-card">
+          <div class="wf-num">Workflow 2</div>
+          <h3>Deposition Summary</h3>
+          <p>Pick a transcript. Topics, summaries, legal significance tags. Excel and navigable PDF both filed back to Box.</p>
+        </div>
+        <div class="wf-card dim">
+          <div class="wf-num">Workflow 3</div>
+          <h3>Medical Chronology</h3>
+          <p>Same architecture. Next build if we're aligned on the approach.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. THE APP -->
+  <div class="slide slide-bg-light" data-index="4">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">5 / 7</div>
+    <div class="slide-content split" style="max-width:940px;">
+      <div class="split-text">
+        <div class="eyebrow">Custom Application</div>
+        <h2>Existing Box login.<br/>Nothing new to manage.</h2>
+        <p class="note" style="max-width:340px;">Ops staff authenticate with their Box credentials. Select a workflow, navigate the folder structure, run it. Output appears in Box.</p>
+      </div>
+      <div class="split-visual">
+        <a href="https://fpa-toolkit.up.railway.app/" target="_blank" rel="noopener noreferrer" class="screenshot-wrap">
+          <img src="auth.png" alt="Box OAuth login" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5b. APP PREVIEW -->
+  <div class="slide slide-bg-white" data-index="5">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">6 / 7</div>
+    <div class="slide-content split" style="max-width:940px;">
+      <div class="split-text">
+        <div class="eyebrow">Custom Application</div>
+        <h2>Select a tool.<br/>Pick a file.<br/>Done.</h2>
+        <p class="note" style="max-width:340px;">No training required. No new vendor accounts. Output writes directly back to the source folder in Box.</p>
+      </div>
+      <div class="split-visual">
+        <a href="https://fpa-toolkit.up.railway.app/" target="_blank" rel="noopener noreferrer" class="screenshot-wrap">
+          <img src="preview.png" alt="FPAmed Document Tools" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. LET'S TALK -->
+  <div class="slide slide-bg-light" data-index="6">
+    <div class="logo-bar"><img src="logo.png" alt="FPAmed" /></div>
+    <div class="slide-counter">7 / 7</div>
+    <div class="slide-content left" style="max-width:780px;">
+      <div class="eyebrow">For Discussion</div>
+      <h2>Four things to work through.</h2>
+      <ul class="talk-list">
+        <li>
+          <div class="talk-num">1</div>
+          <div>
+            <div class="talk-text">Start using this now?</div>
+            <div class="talk-sub">Run real cases through it, iterate on output quality — or hold until Box Consulting reports back.</div>
+          </div>
+        </li>
+        <li>
+          <div class="talk-num">2</div>
+          <div>
+            <div class="talk-text">What do we do with Box Consulting?</div>
+            <div class="talk-sub">They could validate this strategy, present web app alternative (how long?), evaluate/improve the custom app. Worth deciding how to use those hours.</div>
+          </div>
+        </li>
+        <li>
+          <div class="talk-num">3</div>
+          <div>
+            <div class="talk-text">Who owns the custom app going forward?</div>
+            <div class="talk-sub">Continuous improvement, maintenance. Micro-SaaS model?</div>
+          </div>
+        </li>
+        <li>
+          <div class="talk-num">4</div>
+          <div>
+            <div class="talk-text">Who owns the web app side?</div>
+            <div class="talk-sub">The expert-facing tools — AI Q&amp;A, AI Studio agents — live in the web app layer. That's a separate capability that likely needs stewardship. The two layers together are the full Box value for FPAmed.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div id="dots"></div>
+<button id="nav-prev" aria-label="Previous">&#8592;</button>
+<button id="nav-next" aria-label="Next">&#8594;</button>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsEl = document.getElementById('dots');
+  let current = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    document.getElementById('nav-prev').style.opacity = current === 0 ? '0.3' : '1';
+    document.getElementById('nav-next').style.opacity = current === slides.length - 1 ? '0.3' : '1';
+  }
+
+  document.getElementById('nav-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nav-next').addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight',' ','ArrowDown'].includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+    if (['ArrowLeft','ArrowUp'].includes(e.key)) { e.preventDefault(); goTo(current - 1); }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>
