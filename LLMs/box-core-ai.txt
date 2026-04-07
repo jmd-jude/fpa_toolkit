@@ -1,0 +1,3164 @@
+# Box API — AI Extract Structured
+# Generated: 2026-04-06T20:11:58Z
+# Sources:
+  https://developer.box.com/reference/post-ai-extract-structured.md
+  https://developer.box.com/guides/box-ai/ai-tutorials/extract-metadata-structured.md
+  https://developer.box.com/guides/box-ai/ai-agents/index.md
+  https://developer.box.com/guides/box-ai/ai-agents/ai-agent-overrides.md
+  https://developer.box.com/guides/box-ai/index.md
+  https://developer.box.com/guides/box-ai/ai-models/google-gemini-2-5-pro-model-card.md
+  https://developer.box.com/guides/box-ai/ai-models/index.md
+  https://developer.box.com/guides/api-calls/permissions-and-errors/rate-limits.md
+# ==========================================================================
+
+## Extract metadata (structured) — reference
+## Source: https://developer.box.com/reference/post-ai-extract-structured.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Extract metadata (structured)
+
+> Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.
+
+To define the extraction structure, provide either a metadata template or a list of fields. To learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates) or use the [metadata template API](/guides/metadata/templates/create).
+
+This endpoint also supports [Enhanced Extract Agent](/guides/box-ai/ai-tutorials/extract-metadata-structured#enhanced-extract-agent).
+
+For information about supported file formats and languages, see the [Extract metadata from file (structured)](/guides/box-ai/ai-tutorials/extract-metadata-structured) API guide.
+
+<Note>
+  This endpoint is in the version **2024.0**. No changes are required to continue using it. For more details, see **[Box API versioning](/guides/api-calls/api-versioning-strategy)**.
+
+  Learn more about [Box SDK versioning strategy](/guides/tooling/sdks/sdk-versioning/).
+</Note>
+
+
+## OpenAPI
+
+````yaml /box-openapi.json POST /ai/extract_structured
+openapi: 3.0.2
+info:
+  title: Box Platform API
+  description: >-
+    [Box Platform](https://developer.box.com) provides functionality to provide
+    access to content stored within [Box](https://box.com). It provides
+    endpoints for basic manipulation of files and folders, management of users
+    within an enterprise, as well as more complex topics such as legal holds and
+    retention policies.
+  termsOfService: https://cloud.app.box.com/s/rmwxu64h1ipr41u49w3bbuvbsa29wku9
+  contact:
+    name: Box, Inc
+    url: https://developer.box.com
+    email: devrel@box.com
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: '2024.0'
+  x-box-commit-hash: 95117b97f9
+servers:
+  - url: https://api.box.com/2.0
+    description: Box Platform API server.
+security:
+  - OAuth2Security: []
+tags:
+  - name: AI
+    description: A set of endpoints used to interact with supported LLMs.
+    x-box-tag: ai
+  - name: AI Studio
+    description: A set of endpoints used to interact with AI Studio.
+    x-box-tag: ai_studio
+  - name: App item associations
+    x-box-tag: app_item_associations
+  - name: Authorization
+    description: A set of endpoints used to manage user authorization process.
+    x-box-tag: authorization
+    x-box-priority: true
+  - name: Box Sign requests
+    description: Box Sign requests are used to submit a file for signature.
+    x-box-tag: sign_requests
+  - name: Classifications
+    description: >-
+      Classification labels are used for content that is sensitive or under
+      security restrictions.
+    x-box-tag: classifications
+  - name: Classifications on files
+    description: >-
+      Classification labels are used for files that are sensitive or under
+      security restrictions.
+    x-box-tag: file_classifications
+  - name: Classifications on folders
+    description: >-
+      Classification labels are used for folders that are sensitive or under
+      security restrictions.
+    x-box-tag: folder_classifications
+  - name: Collaborations
+    description: >-
+      Collaborations define access permissions for users and groups to files and
+      folders, similar to access control lists.
+    x-box-tag: user_collaborations
+  - name: Collaborations (List)
+    description: >-
+      A set of endpoints used to retrieve file, folder, pending, and group
+      collaborations.
+    x-box-tag: list_collaborations
+  - name: Collections
+    description: >-
+      Collections are a way to group files, folders, and web links without
+      putting them all into a folder.
+    x-box-tag: collections
+  - name: Comments
+    description: >-
+      Comments are messages generated users on files, allowing users to
+      collaborate on a file, discussing any feedback they might have on the
+      content.
+    x-box-tag: comments
+  - name: Device pinners
+    description: >-
+      Device pinners allow enterprises to control what devices can use native
+      Box applications.
+    x-box-tag: device_pinners
+  - name: Domain restrictions (User exemptions)
+    description: >-
+      A set of endpoints that allow exempting users from restrictions imposed by
+      the list of allowed collaboration domains for a specific enterprise.
+    x-box-tag: collaboration_allowlist_exempt_targets
+  - name: Domain restrictions for collaborations
+    description: >-
+      A set of endpoints that manage domains for which users can collaborate
+      with files and folders in an enterprise.
+    x-box-tag: collaboration_allowlist_entries
+  - name: Downloads
+    description: >-
+      Downloads allow saving files to the application's server, or directly by
+      the end user in a browser.
+    x-box-tag: downloads
+  - name: Email aliases
+    description: >-
+      Email aliases provide a list of emails additional to the user's primary
+      login email.
+    x-box-tag: email_aliases
+  - name: Events
+    description: >-
+      Events provide a way for an application to subscribe to any actions
+      performed by any user, users, or service in an enterprise.
+    x-box-tag: events
+  - name: File requests
+    description: >-
+      File Requests provide a fast and secure way to request files and
+      associated metadata from anyone. Users can create new file requests based
+      on an existing file request, update file request settings, activate,
+      deactivate, and delete file requests programmatically.
+    x-box-tag: file_requests
+  - name: File version legal holds
+    description: >-
+      A legal hold is a process that an enterprise can use to preserve all forms
+      of potentially relevant information when litigation is pending or
+      reasonably anticipated. A File Version Legal Hold represents all the
+      policies that are assigned to a specific file version.
+    x-box-tag: file_version_legal_holds
+  - name: File version retentions
+    description: >-
+      A retention policy blocks permanent deletion of content for a specified
+      amount of time. A file version retention is a record for a retained file.
+    x-box-tag: file_version_retentions
+  - name: File versions
+    description: A set of endpoints used to manage specific versions of a file.
+    x-box-tag: file_versions
+  - name: Files
+    description: >-
+      Files, together with Folders, are at the core of the Box API. Files can be
+      uploaded and downloaded, as well as hold important metadata information
+      about the content.
+    x-box-tag: files
+  - name: Folder Locks
+    description: >-
+      Folder locks define access restrictions placed by folder owners to prevent
+      specific folders from being moved or deleted.
+    x-box-tag: folder_locks
+  - name: Folders
+    description: >-
+      Folders, together with Files, are at the core of the Box API. Folders can
+      be uploaded and downloaded, as well as hold important metadata information
+      about the content.
+    x-box-tag: folders
+  - name: Integration mappings
+    description: >-
+      Integration Mappings allow the users to manage where content from partner
+      apps is stored in Box.
+    x-box-tag: integration_mappings
+  - name: Group memberships
+    description: Group memberships signify that a user is a part of the group.
+    x-box-tag: memberships
+  - name: Groups
+    description: Groups created in an enterprise.
+    x-box-tag: groups
+  - name: Invites
+    description: Invites are used to invite the user to an enterprise.
+    x-box-tag: invites
+  - name: Legal hold policies
+    description: >-
+      A legal hold is a process that an enterprise can use to preserve all forms
+      of potentially relevant information when litigation is pending or
+      reasonably anticipated.
+    x-box-tag: legal_hold_policies
+  - name: Legal hold policy assignments
+    description: >-
+      A Legal Hold Policy Assignment is a relation between a policy and
+      custodian. In this case, as custodian can be a user, folder, file, or file
+      version.
+    x-box-tag: legal_hold_policy_assignments
+  - name: Metadata cascade policies
+    description: >-
+      A metadata cascade policy describes how metadata instances applied to a
+      folder should be applied to any item within that folder.
+    x-box-tag: metadata_cascade_policies
+  - name: Metadata instances (Files)
+    description: >-
+      A metadata instance describes the relation between a template and a file,
+      including the values that are assigned for every field.
+    x-box-tag: file_metadata
+  - name: Metadata instances (Folders)
+    description: >-
+      A metadata instance describes the relation between a template and a
+      folder, including the values that are assigned for every field.
+    x-box-tag: folder_metadata
+  - name: Metadata taxonomies
+    description: >-
+      A metadata taxonomy is a hierarchical classification system that helps
+      organize and manage metadata within an enterprise.
+    x-box-tag: metadata_taxonomies
+  - name: Metadata templates
+    description: >-
+      A metadata template describes a reusable set of key/value pairs that can
+      be assigned to a file.
+    x-box-tag: metadata_templates
+  - name: Recent items
+    description: >-
+      Recent items represent items such as files or folders that the user
+      accessed recently.
+    x-box-tag: recent_items
+  - name: Retention policies
+    description: >-
+      A retention policy blocks permanent deletion of content for a specified
+      amount of time. Admins can create retention policies and then assign them
+      to specific folders or their entire enterprise.
+    x-box-tag: retention_policies
+  - name: Retention policy assignments
+    description: >-
+      A Retention Policy Assignment is a relation between a policy and folder or
+      enterprise. Creating an assignment puts a retention on all the file
+      versions that belong to that folder or enterprise.
+    x-box-tag: retention_policy_assignments
+  - name: Search
+    description: >-
+      The Box API provides a way to find content in Box using full-text search
+      queries.
+    x-box-tag: search
+  - name: Session termination
+    description: >-
+      Session termination API is used to validate the roles and permissions of
+      the group, and creates asynchronous jobs to terminate the group's
+      sessions.
+    x-box-tag: session_termination
+  - name: Shared links (Files)
+    description: >-
+      Files shared links are URLs that are generated for files stored in Box,
+      which provide direct, read-only access to the resource.
+    x-box-tag: shared_links_files
+  - name: Shared links (Folders)
+    description: >-
+      Folders shared links are URLs that are generated for folders stored in
+      Box, which provide direct, read-only access to the resource.
+    x-box-tag: shared_links_folders
+  - name: Shared links (Web Links)
+    description: >-
+      Web links for files are URLs that are generated for web links in Box,
+      which provide direct, read-only access to the resource.
+    x-box-tag: shared_links_web_links
+  - name: Shared links (App Items)
+    description: >-
+      URLs generated for app items stored in Box, which provide direct,
+      read-only access to the resource.
+    x-box-tag: shared_links_app_items
+  - name: Shield information barriers
+    description: >-
+      Shield information barrier in Box defines an ethical wall. An ethical wall
+      is a mechanism that prevents exchanges or communication that could lead to
+      conflicts of interest and therefore result in business activities
+      ethically or legally questionable.
+    x-box-tag: shield_information_barriers
+  - name: Shield information barrier segments
+    description: >-
+      Shield information barrier segment represents a defined group of users. A
+      user can be a member of only one segment, which makes segments different
+      from groups.
+    x-box-tag: shield_information_barrier_segments
+  - name: Shield information barrier segment members
+    description: >-
+      Shield information barrier segment member represents a user that is
+      assigned to a specific segment.
+    x-box-tag: shield_information_barrier_segment_members
+  - name: Shield information barrier reports
+    description: >-
+      Shield information barrier reports contain information on what existing
+      collaborations will be removed permanently when the information barrier is
+      enabled.
+    x-box-tag: shield_information_barrier_reports
+  - name: Shield information barrier segment restrictions
+    description: >-
+      Shield information barrier segment restriction is an access restriction
+      based on the content (file or folder) owner.
+    x-box-tag: shield_information_barrier_segment_restrictions
+  - name: Box Sign templates
+    description: >-
+      Sign templates allow you to use a predefined Box Sign template when
+      creating a signature request. The template includes placeholders that are
+      automatically populated with data when creating the request.
+    x-box-tag: sign_templates
+  - name: Skills
+    description: >-
+      Box Skills are designed to allow custom processing of files uploaded to
+      Box, with the intent of enhancing the underlying metadata of the file.
+    x-box-tag: skills
+  - name: Standard and Zones Storage Policies
+    description: >-
+      Storage policy assignment represents the storage zone for items in a given
+      enterprise.
+    x-box-tag: storage_policies
+  - name: Standard and Zones Storage Policy Assignments
+    description: >-
+      Storage policy assignment represents the relation between storage zone and
+      the assigned item (for example a file stored in a specific zone).
+    x-box-tag: storage_policy_assignments
+  - name: Task assignments
+    description: >-
+      A task assignment defines which task is assigned to which user to
+      complete.
+    x-box-tag: task_assignments
+  - name: Tasks
+    description: >-
+      Tasks allow users to request collaborators on a file to review a file or
+      complete a piece of work. Tasks can be used by developers to create
+      file-centric workflows.
+    x-box-tag: tasks
+  - name: Terms of service
+    description: A set of endpoints used to manage terms of service agreements.
+    x-box-tag: terms_of_services
+  - name: Terms of service user statuses
+    description: >-
+      A set of endpoints used to manage the status of terms of service for a
+      particular user.
+    x-box-tag: terms_of_service_user_statuses
+  - name: Transfer folders
+    description: >-
+      API designed to move all of the items (files, folders and workflows) owned
+      by a user into another user's account.
+    x-box-tag: transfer
+  - name: Trashed files
+    description: Files that were deleted and are in trash.
+    x-box-tag: trashed_files
+  - name: Trashed folders
+    description: Folders that were deleted and are in trash.
+    x-box-tag: trashed_folders
+  - name: Trashed items
+    description: Items that were deleted and are in trash.
+    x-box-tag: trashed_items
+  - name: Trashed web links
+    description: Web links that were deleted and are in trash.
+    x-box-tag: trashed_web_links
+  - name: Uploads
+    description: >-
+      The direct file upload API supports files up to 50MB in size and sends all
+      the binary data to the Box API in 1 API request.
+    x-box-tag: uploads
+  - name: Uploads (Chunked)
+    description: >-
+      The chunked upload endpoints support files from 20MB in size and allow an
+      application to upload the file in parts, allowing for more control to
+      catch any errors and retry parts individually.
+    x-box-tag: chunked_uploads
+  - name: User avatars
+    description: >-
+      User avatars are JPG or PNG files uploaded to Box to represent the user
+      image. They are then displayed in the user account.
+    x-box-tag: avatars
+  - name: Users
+    description: >-
+      Box API supports a variety of users, ranging from real employees logging
+      in with their Managed User account, to applications using App Users to
+      drive powerful automation workflows.
+    x-box-tag: users
+  - name: Watermarks (Files)
+    description: >-
+      A watermark is a semi-transparent overlay on an embedded file preview that
+      displays a viewer's email address or user ID and the time of access over
+      the file.
+    x-box-tag: file_watermarks
+  - name: Watermarks (Folders)
+    description: >-
+      A watermark is a semi-transparent overlay on an embedded folder preview
+      that displays a viewer's email address or user ID and the time of access
+      over the folder content.
+    x-box-tag: folder_watermarks
+  - name: Web links
+    description: >-
+      Web links are objects that point to URLs. These objects are also known as
+      bookmarks within the Box web application.
+    x-box-tag: web_links
+  - name: Webhooks
+    description: >-
+      Webhooks allow you to monitor Box content for events, and receive
+      notifications to a URL of your choice when they occur. For example, a
+      workflow may include waiting for a file to be downloaded to delete a
+      shared link.
+    x-box-tag: webhooks
+  - name: Workflows
+    description: >-
+      Box Relay Workflows are objects that represent a named collection of
+      flows.
+    x-box-tag: workflows
+  - name: Zip Downloads
+    description: >-
+      Zip downloads represent a successful request to create a ZIP archive with
+      files and folders.
+    x-box-tag: zip_downloads
+externalDocs:
+  description: Box Developer Documentation.
+  url: https://developer.box.com
+paths:
+  /ai/extract_structured:
+    post:
+      tags:
+        - AI
+      summary: Extract metadata (structured)
+      description: >-
+        Sends an AI request to supported Large Language Models (LLMs) and
+        returns extracted metadata as a set of key-value pairs.
+
+
+        To define the extraction structure, provide either a metadata template
+        or a list of fields. To learn more about creating templates, see
+        [Creating metadata templates in the Admin
+        Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)
+        or use the [metadata template API](/guides/metadata/templates/create).
+
+
+        This endpoint also supports [Enhanced Extract
+        Agent](/guides/box-ai/ai-tutorials/extract-metadata-structured#enhanced-extract-agent).
+
+
+        For information about supported file formats and languages, see the
+        [Extract metadata from file
+        (structured)](/guides/box-ai/ai-tutorials/extract-metadata-structured)
+        API guide.
+      operationId: post_ai_extract_structured
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiExtractStructured'
+      responses:
+        '200':
+          description: A successful response including the answer from the LLM.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiExtractStructuredResponse'
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientError'
+        default:
+          description: An unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientError'
+      x-codeSamples:
+        - lang: curl
+          label: Extract metadata (structured)
+          source: |-
+            curl -i -L 'https://api.box.com/2.0/ai/extract_structured' \
+                 -H 'content-type: application/json' \
+                 -H 'authorization: Bearer <ACCESS_TOKEN>' \
+                 -d '{
+                    "items": [
+                      {
+                        "id": "12345678",
+                        "type": "file",
+                        "content": "This is file content."
+                      }
+                    ],
+                    "metadata_template": {
+                        "template_key": "",
+                        "type": "metadata_template",
+                        "scope": ""
+                    },
+                    "fields": [
+                        {
+                          "key": "name",
+                          "description": "The name of the person.",
+                          "displayName": "Name",
+                          "prompt": "The name is the first and last name from the email address.",
+                          "type": "string",
+                          "options": [
+                            {
+                              "key": "First Name"
+                            },
+                            {
+                              "key": "Last Name"
+                            }
+                          ]
+                        }
+                    ],
+                    "ai_agent": {
+                      "type": "ai_agent_extract_structured",
+                      "long_text": {
+                        "model": "azure__openai__gpt_4o_mini"
+                        },
+                      "basic_text": {
+                        "model": "azure__openai__gpt_4o_mini"
+                     }
+                  }
+               }'
+        - lang: dotnet
+          label: Extract metadata (structured)
+          source: >-
+            await client.Ai.CreateAiExtractStructuredAsync(requestBody: new
+            AiExtractStructured(items: Array.AsReadOnly(new [] {new
+            AiItemBase(id: file.Id)})) { Fields = Array.AsReadOnly(new [] {new
+            AiExtractStructuredFieldsField(key: "firstName") { DisplayName =
+            "First name", Description = "Person first name", Prompt = "What is
+            the your first name?", Type = "string" },new
+            AiExtractStructuredFieldsField(key: "lastName") { DisplayName =
+            "Last name", Description = "Person last name", Prompt = "What is the
+            your last name?", Type = "string" },new
+            AiExtractStructuredFieldsField(key: "dateOfBirth") { DisplayName =
+            "Birth date", Description = "Person date of birth", Prompt = "What
+            is the date of your birth?", Type = "date" },new
+            AiExtractStructuredFieldsField(key: "age") { DisplayName = "Age",
+            Description = "Person age", Prompt = "How old are you?", Type =
+            "float" },new AiExtractStructuredFieldsField(key: "hobby") {
+            DisplayName = "Hobby", Description = "Person hobby", Prompt = "What
+            is your hobby?", Type = "multiSelect", Options =
+            Array.AsReadOnly(new [] {new
+            AiExtractStructuredFieldsOptionsField(key: "guitar"),new
+            AiExtractStructuredFieldsOptionsField(key: "books")}) }}),
+            IncludeConfidenceScore = true });
+        - lang: swift
+          label: Extract metadata (structured)
+          source: >-
+            try await client.ai.createAiExtractStructured(requestBody:
+            AiExtractStructured(fields: [AiExtractStructuredFieldsField(key:
+            "firstName", displayName: "First name", description: "Person first
+            name", prompt: "What is the your first name?", type: "string"),
+            AiExtractStructuredFieldsField(key: "lastName", displayName: "Last
+            name", description: "Person last name", prompt: "What is the your
+            last name?", type: "string"), AiExtractStructuredFieldsField(key:
+            "dateOfBirth", displayName: "Birth date", description: "Person date
+            of birth", prompt: "What is the date of your birth?", type: "date"),
+            AiExtractStructuredFieldsField(key: "age", displayName: "Age",
+            description: "Person age", prompt: "How old are you?", type:
+            "float"), AiExtractStructuredFieldsField(key: "hobby", displayName:
+            "Hobby", description: "Person hobby", prompt: "What is your hobby?",
+            type: "multiSelect", options:
+            [AiExtractStructuredFieldsOptionsField(key: "guitar"),
+            AiExtractStructuredFieldsOptionsField(key: "books")])], items:
+            [AiItemBase(id: file.id)], includeConfidenceScore: true))
+        - lang: java
+          label: Extract metadata (structured)
+          source: >-
+            client.getAi().createAiExtractStructured(new
+            AiExtractStructured.Builder(Arrays.asList(new
+            AiItemBase(file.getId()))).fields(Arrays.asList(new
+            AiExtractStructuredFieldsField.Builder("firstName").description("Person
+            first name").displayName("First name").prompt("What is the your
+            first name?").type("string").build(), new
+            AiExtractStructuredFieldsField.Builder("lastName").description("Person
+            last name").displayName("Last name").prompt("What is the your last
+            name?").type("string").build(), new
+            AiExtractStructuredFieldsField.Builder("dateOfBirth").description("Person
+            date of birth").displayName("Birth date").prompt("What is the date
+            of your birth?").type("date").build(), new
+            AiExtractStructuredFieldsField.Builder("age").description("Person
+            age").displayName("Age").prompt("How old are
+            you?").type("float").build(), new
+            AiExtractStructuredFieldsField.Builder("hobby").description("Person
+            hobby").displayName("Hobby").prompt("What is your
+            hobby?").type("multiSelect").options(Arrays.asList(new
+            AiExtractStructuredFieldsOptionsField("guitar"), new
+            AiExtractStructuredFieldsOptionsField("books"))).build())).includeConfidenceScore(true).aiAgent(aiExtractStructuredAgentBasicTextConfig).build())
+        - lang: node
+          label: Extract metadata (structured)
+          source: |-
+            await client.ai.createAiExtractStructured({
+              fields: [
+                {
+                  key: 'firstName',
+                  displayName: 'First name',
+                  description: 'Person first name',
+                  prompt: 'What is the your first name?',
+                  type: 'string',
+                } satisfies AiExtractStructuredFieldsField,
+                {
+                  key: 'lastName',
+                  displayName: 'Last name',
+                  description: 'Person last name',
+                  prompt: 'What is the your last name?',
+                  type: 'string',
+                } satisfies AiExtractStructuredFieldsField,
+                {
+                  key: 'dateOfBirth',
+                  displayName: 'Birth date',
+                  description: 'Person date of birth',
+                  prompt: 'What is the date of your birth?',
+                  type: 'date',
+                } satisfies AiExtractStructuredFieldsField,
+                {
+                  key: 'age',
+                  displayName: 'Age',
+                  description: 'Person age',
+                  prompt: 'How old are you?',
+                  type: 'float',
+                } satisfies AiExtractStructuredFieldsField,
+                {
+                  key: 'hobby',
+                  displayName: 'Hobby',
+                  description: 'Person hobby',
+                  prompt: 'What is your hobby?',
+                  type: 'multiSelect',
+                  options: [
+                    { key: 'guitar' } satisfies AiExtractStructuredFieldsOptionsField,
+                    { key: 'books' } satisfies AiExtractStructuredFieldsOptionsField,
+                  ],
+                } satisfies AiExtractStructuredFieldsField,
+              ],
+              items: [new AiItemBase({ id: file.id })],
+              includeConfidenceScore: true,
+              aiAgent: aiExtractStructuredAgentBasicTextConfig,
+            } satisfies AiExtractStructured);
+        - lang: python
+          label: Extract metadata (structured)
+          source: |-
+            client.ai.create_ai_extract_structured(
+                [AiItemBase(id=file.id)],
+                fields=[
+                    CreateAiExtractStructuredFields(
+                        key="firstName",
+                        display_name="First name",
+                        description="Person first name",
+                        prompt="What is the your first name?",
+                        type="string",
+                    ),
+                    CreateAiExtractStructuredFields(
+                        key="lastName",
+                        display_name="Last name",
+                        description="Person last name",
+                        prompt="What is the your last name?",
+                        type="string",
+                    ),
+                    CreateAiExtractStructuredFields(
+                        key="dateOfBirth",
+                        display_name="Birth date",
+                        description="Person date of birth",
+                        prompt="What is the date of your birth?",
+                        type="date",
+                    ),
+                    CreateAiExtractStructuredFields(
+                        key="age",
+                        display_name="Age",
+                        description="Person age",
+                        prompt="How old are you?",
+                        type="float",
+                    ),
+                    CreateAiExtractStructuredFields(
+                        key="hobby",
+                        display_name="Hobby",
+                        description="Person hobby",
+                        prompt="What is your hobby?",
+                        type="multiSelect",
+                        options=[
+                            CreateAiExtractStructuredFieldsOptionsField(key="guitar"),
+                            CreateAiExtractStructuredFieldsOptionsField(key="books"),
+                        ],
+                    ),
+                ],
+                include_confidence_score=True,
+                ai_agent=ai_extract_structured_agent_basic_text_config,
+            )
+components:
+  schemas:
+    AiExtractStructured:
+      description: AI Extract Structured Request object.
+      type: object
+      properties:
+        items:
+          description: >-
+            The items to be processed by the LLM. Currently you can use files
+            only.
+          type: array
+          items:
+            $ref: '#/components/schemas/AiItem--Base'
+          maxItems: 25
+          minItems: 1
+          uniqueItems: true
+        metadata_template:
+          description: >-
+            The metadata template containing the fields to extract. For your
+            request to work, you must provide either `metadata_template` or
+            `fields`, but not both.
+          type: object
+          properties:
+            template_key:
+              description: The name of the metadata template.
+              type: string
+              example: invoiceTemplate
+            type:
+              description: Value is always `metadata_template`.
+              type: string
+              example: metadata_template
+              enum:
+                - metadata_template
+            scope:
+              description: >-
+                The scope of the metadata template that can either be global or
+                enterprise.
+
+
+                - The **global** scope is used for templates that are available
+                to any Box enterprise.
+
+                - The **enterprise** scope represents templates created within a
+                specific enterprise, containing the ID of that enterprise.
+              type: string
+              example: enterprise_12345
+              maxLength: 40
+        fields:
+          description: >-
+            The fields to be extracted from the provided items. For your request
+            to work, you must provide either `metadata_template` or `fields`,
+            but not both.
+          type: array
+          items:
+            type: object
+            description: The fields to be extracted from the provided items.
+            required:
+              - key
+            properties:
+              key:
+                description: A unique identifier for the field.
+                type: string
+                example: name
+              description:
+                description: A description of the field.
+                type: string
+                example: The name of the person.
+              displayName:
+                description: The display name of the field.
+                type: string
+                example: Name
+              prompt:
+                description: >-
+                  The context about the key that may include how to find and
+                  format it.
+                type: string
+                example: Name is the first and last name from the email address
+              type:
+                description: >-
+                  The type of the field. It include but is not limited to
+                  string, float, date, enum, and multiSelect.
+                type: string
+                example: enum
+              options:
+                description: >-
+                  A list of options for this field. This is most often used in
+                  combination with the enum and multiSelect field types.
+                type: array
+                items:
+                  type: object
+                  required:
+                    - key
+                  properties:
+                    key:
+                      description: A unique identifier for the field.
+                      type: string
+                      example: First Name
+                example:
+                  - key: First Name
+                  - key: Last Name
+          minItems: 1
+          uniqueItems: true
+        include_confidence_score:
+          description: >-
+            A flag to indicate whether confidence scores for every extracted
+            field should be returned.
+          type: boolean
+          example: true
+        include_reference:
+          description: >-
+            A flag to indicate whether references for every extracted field
+            should be returned.
+          type: boolean
+          example: true
+        ai_agent:
+          allOf:
+            - $ref: '#/components/schemas/AiExtractStructuredAgent'
+            - description: >-
+                The AI agent to be used for the structured extraction. Defaults
+                to the Standard Agent if not specified. If you want to use
+                Enhanced Extract Agent, see [Enhanced Extract
+                Agent](/guides/box-ai/ai-tutorials/extract-metadata-structured#enhanced-extract-agent)
+                for details.
+      required:
+        - items
+      title: AI Extract Structured Request
+      x-box-tag: ai
+    AiExtractStructuredResponse:
+      description: AI extract structured response.
+      type: object
+      properties:
+        answer:
+          $ref: '#/components/schemas/AiExtractResponse'
+        created_at:
+          description: >-
+            The ISO date formatted timestamp of when the answer to the prompt
+            was created.
+          type: string
+          format: date-time
+          example: '2012-12-12T10:53:43-08:00'
+        completion_reason:
+          description: The reason the response finishes.
+          type: string
+          example: done
+        confidence_score:
+          description: >-
+            The confidence score levels and numeric values for each extracted
+            field as a JSON dictionary. This can be empty if no field could be
+            extracted.
+          type: object
+          additionalProperties: {}
+        reference:
+          description: >-
+            The reference for each extracted field as a JSON dictionary. This
+            can be empty if no field could be extracted.
+          type: object
+          additionalProperties: {}
+        ai_agent_info:
+          $ref: '#/components/schemas/AiAgentInfo'
+      required:
+        - answer
+        - created_at
+      title: AI extract structured response
+      x-box-resource-id: ai_extract_structured_response
+      x-box-tag: ai
+    ClientError:
+      description: A generic error.
+      type: object
+      properties:
+        type:
+          description: The value will always be `error`.
+          type: string
+          example: error
+          enum:
+            - error
+          nullable: false
+        status:
+          description: The HTTP status of the response.
+          type: integer
+          format: int32
+          example: 400
+          nullable: false
+        code:
+          description: A Box-specific error code.
+          type: string
+          example: item_name_invalid
+          enum:
+            - created
+            - accepted
+            - no_content
+            - redirect
+            - not_modified
+            - bad_request
+            - unauthorized
+            - forbidden
+            - not_found
+            - method_not_allowed
+            - conflict
+            - precondition_failed
+            - too_many_requests
+            - internal_server_error
+            - unavailable
+            - item_name_invalid
+            - insufficient_scope
+        message:
+          description: A short message describing the error.
+          type: string
+          example: Method Not Allowed
+          nullable: false
+        context_info:
+          description: >-
+            A free-form object that contains additional context about the error.
+            The possible fields are defined on a per-endpoint basis. `message`
+            is only one example.
+          type: object
+          example:
+            message: Something went wrong
+          additionalProperties: {}
+          nullable: true
+        help_url:
+          description: A URL that links to more information about why this error occurred.
+          type: string
+          example: >-
+            https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/
+          nullable: false
+        request_id:
+          description: >-
+            A unique identifier for this response, which can be used when
+            contacting Box support.
+          type: string
+          example: abcdef123456
+          nullable: false
+      title: Client error
+      x-box-resource-id: client_error
+    AiItem--Base:
+      description: The item to be processed by the LLM.
+      type: object
+      properties:
+        id:
+          description: The ID of the file.
+          type: string
+          example: '123'
+        type:
+          description: The type of the item. Currently the value can be `file` only.
+          type: string
+          example: file
+          enum:
+            - file
+        content:
+          description: The content of the item, often the text representation.
+          example: This is file content.
+          type: string
+      required:
+        - id
+        - type
+      title: AI Item (Base)
+      x-box-variant: base
+      x-box-variants:
+        - base
+    AiExtractStructuredAgent:
+      description: The AI agent to be used to handle the AI extract structured request.
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/AiAgentReference'
+        - $ref: '#/components/schemas/AiAgentExtractStructured'
+      title: AI Extract Structured Request agent
+    AiExtractResponse:
+      description: >-
+        AI extract response. The content of this response may vary depending on
+        the requested configuration.
+      type: object
+      additionalProperties: {}
+      title: AI extract response
+      x-box-resource-id: ai_extract_response
+      x-box-tag: ai
+    AiAgentInfo:
+      description: The information on the models and processors used in the request.
+      type: object
+      properties:
+        models:
+          description: The models used for the request.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: The name of the model used for the request.
+                type: string
+                example: azure__openai__text_embedding_ada_002
+              provider:
+                description: The provider that owns the model used for the request.
+                type: string
+                example: azure
+              supported_purpose:
+                description: >-
+                  The supported purpose utilized by the model used for the
+                  request.
+                type: string
+                example: embedding
+        processor:
+          description: The processor used for the request.
+          type: string
+          example: basic_text
+      title: The information on the models and processors used in the request.
+    AiAgentReference:
+      description: The AI agent used to handle queries.
+      type: object
+      properties:
+        type:
+          description: The type of AI agent used to handle queries.
+          type: string
+          example: ai_agent_id
+          enum:
+            - ai_agent_id
+          nullable: false
+        id:
+          description: >-
+            The ID of an Agent. This can be a numeric ID for custom agents (for
+            example, `14031`) or a unique identifier for pre-built agents (for
+            example, `enhanced_extract_agent` for the [Enhanced Extract
+            Agent](/guides/box-ai/ai-tutorials/extract-metadata-structured#enhanced-extract-agent)).
+          type: string
+          example: '14031'
+          nullable: false
+      required:
+        - type
+      title: AI agent reference
+      x-box-resource-id: ai_agent_reference
+      x-box-tag: ai
+    AiAgentExtractStructured:
+      description: The AI agent to be used for structured extraction.
+      type: object
+      properties:
+        type:
+          description: The type of AI agent to be used for extraction.
+          type: string
+          example: ai_agent_extract_structured
+          enum:
+            - ai_agent_extract_structured
+          nullable: false
+        long_text:
+          $ref: '#/components/schemas/AiAgentLongTextTool'
+        basic_text:
+          $ref: '#/components/schemas/AiAgentBasicTextTool'
+        basic_image:
+          $ref: '#/components/schemas/AiAgentBasicTextTool'
+      required:
+        - type
+      title: AI agent for structured extract request
+      x-box-resource-id: ai_agent_extract_structured
+      x-box-tag: ai
+    AiAgentLongTextTool:
+      description: AI agent processor used to to handle longer text.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AiAgentBasicTextTool'
+        - properties:
+            embeddings:
+              type: object
+              properties:
+                model:
+                  description: The model used for the AI agent for calculating embeddings.
+                  type: string
+                  example: azure__openai__text_embedding_ada_002
+                strategy:
+                  type: object
+                  properties:
+                    id:
+                      description: >-
+                        The strategy used for the AI agent for calculating
+                        embeddings.
+                      type: string
+                      example: basic
+                    num_tokens_per_chunk:
+                      description: The number of tokens per chunk.
+                      type: integer
+                      example: 64
+                      maximum: 512
+                      minimum: 1
+      title: AI agent long text tool
+      x-box-tag: ai
+    AiAgentBasicTextTool:
+      description: AI agent processor used to handle basic text.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AiAgentBasicTextToolBase'
+        - properties:
+            system_message:
+              description: >-
+                System messages try to help the LLM "understand" its role and
+                what it is supposed to do.
+              type: string
+              example: You are a helpful travel assistant specialized in budget travel
+            prompt_template:
+              description: >-
+                The prompt template contains contextual information of the
+                request and the user prompt. When passing `prompt_template`
+                parameters, you **must include** inputs for `{user_question}`
+                and `{content}`. `{current_date}` is optional, depending on the
+                use.
+              type: string
+              example: >-
+                It is `{current_date}`, consider these travel options
+                `{content}` and answer the `{user_question}`.
+              maxLength: 10000
+              pattern: >-
+                (\{user_question\}[\s\S]*?\{content\}|\{content\}[\s\S]*?\{user_question\})
+      title: AI agent basic text tool
+      x-box-tag: ai
+    AiAgentBasicTextToolBase:
+      description: AI agent processor used to handle basic text.
+      type: object
+      properties:
+        model:
+          description: >-
+            The model used for the AI agent for basic text. For specific model
+            values, see the [available models list](/guides/box-ai/ai-models).
+          type: string
+          example: azure__openai__gpt_4o_mini
+        num_tokens_for_completion:
+          description: The number of tokens for completion.
+          type: integer
+          example: 8400
+          minimum: 1
+        llm_endpoint_params:
+          $ref: '#/components/schemas/AiLlmEndpointParams'
+      title: AI agent basic text tool
+      x-box-tag: ai
+    AiLlmEndpointParams:
+      description: The parameters for the LLM endpoint specific to a model.
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/AiLlmEndpointParamsOpenAi'
+        - $ref: '#/components/schemas/AiLlmEndpointParamsGoogle'
+        - $ref: '#/components/schemas/AiLlmEndpointParamsAWS'
+        - $ref: '#/components/schemas/AiLlmEndpointParamsIBM'
+      title: AI LLM endpoint parameters
+    AiLlmEndpointParamsOpenAi:
+      description: AI LLM endpoint params OpenAI object.
+      type: object
+      properties:
+        type:
+          description: >-
+            The type of the AI LLM endpoint params object for OpenAI. This
+            parameter is **required**.
+          type: string
+          example: openai_params
+          enum:
+            - openai_params
+          nullable: false
+        temperature:
+          description: >-
+            What sampling temperature to use, between 0 and 2. Higher values
+            like 0.8 will make the output more random, while lower values like
+            0.2 will make it more focused and deterministic. We generally
+            recommend altering this or `top_p` but not both.
+          type: number
+          example: 0
+          maximum: 2
+          minimum: 0
+          nullable: true
+        top_p:
+          description: >-
+            An alternative to sampling with temperature, called nucleus
+            sampling, where the model considers the results of the tokens with
+            `top_p` probability mass. So 0.1 means only the tokens comprising
+            the top 10% probability mass are considered. We generally recommend
+            altering this or temperature but not both.
+          type: number
+          example: 1
+          maximum: 1
+          minimum: 0.1
+          nullable: true
+        frequency_penalty:
+          description: >-
+            A number between -2.0 and 2.0. Positive values penalize new tokens
+            based on their existing frequency in the text so far, decreasing the
+            model's likelihood to repeat the same line verbatim.
+          type: number
+          example: 1.5
+          maximum: 2
+          minimum: -2
+          nullable: true
+        presence_penalty:
+          description: >-
+            A number between -2.0 and 2.0. Positive values penalize new tokens
+            based on whether they appear in the text so far, increasing the
+            model's likelihood to talk about new topics.
+          type: number
+          example: 1.5
+          maximum: 2
+          minimum: -2
+          nullable: true
+        stop:
+          description: Up to 4 sequences where the API will stop generating further tokens.
+          type: string
+          example: <|im_end|>
+          nullable: true
+      required:
+        - type
+      title: AI LLM endpoint params OpenAI
+      x-box-resource-id: ai_llm_endpoint_params_openai
+    AiLlmEndpointParamsGoogle:
+      description: AI LLM endpoint params Google object.
+      type: object
+      properties:
+        type:
+          description: >-
+            The type of the AI LLM endpoint params object for Google. This
+            parameter is **required**.
+          type: string
+          example: google_params
+          enum:
+            - google_params
+          nullable: false
+        temperature:
+          description: >-
+            The temperature is used for sampling during response generation,
+            which occurs when `top-P` and `top-K` are applied. Temperature
+            controls the degree of randomness in the token selection.
+          type: number
+          example: 0
+          maximum: 2
+          minimum: 0
+          nullable: true
+        top_p:
+          description: >-
+            `Top-P` changes how the model selects tokens for output. Tokens are
+            selected from the most (see `top-K`) to least probable until the sum
+            of their probabilities equals the `top-P` value.
+          type: number
+          example: 1
+          maximum: 2
+          minimum: 0.1
+          nullable: true
+        top_k:
+          description: >-
+            `Top-K` changes how the model selects tokens for output. A low
+            `top-K` means the next selected token is the most probable among all
+            tokens in the model's vocabulary (also called greedy decoding),
+            while a high `top-K` means that the next token is selected from
+            among the three most probable tokens by using temperature.
+          type: number
+          example: 1
+          maximum: 2
+          minimum: 0.1
+          nullable: true
+      required:
+        - type
+      title: AI LLM endpoint params Google
+      x-box-resource-id: ai_llm_endpoint_params_google
+    AiLlmEndpointParamsAWS:
+      description: AI LLM endpoint params AWS object.
+      type: object
+      properties:
+        type:
+          description: >-
+            The type of the AI LLM endpoint params object for AWS. This
+            parameter is **required**.
+          type: string
+          example: aws_params
+          enum:
+            - aws_params
+          nullable: false
+        temperature:
+          description: >-
+            What sampling temperature to use, between 0 and 1. Higher values
+            like 0.8 will make the output more random, while lower values like
+            0.2 will make it more focused and deterministic. We generally
+            recommend altering this or `top_p` but not both.
+          type: number
+          example: 0.5
+          maximum: 1
+          minimum: 0
+          nullable: true
+        top_p:
+          description: >-
+            An alternative to sampling with temperature, called nucleus
+            sampling, where the model considers the results of the tokens with
+            `top_p` probability mass. So 0.1 means only the tokens comprising
+            the top 10% probability mass are considered. We generally recommend
+            altering this or temperature but not both.
+          type: number
+          example: 0.5
+          maximum: 1
+          minimum: 0
+          nullable: true
+      required:
+        - type
+      title: AI LLM endpoint params AWS
+      x-box-resource-id: ai_llm_endpoint_params_aws
+    AiLlmEndpointParamsIBM:
+      description: AI LLM endpoint params IBM object.
+      type: object
+      properties:
+        type:
+          description: >-
+            The type of the AI LLM endpoint params object for IBM. This
+            parameter is **required**.
+          type: string
+          example: ibm_params
+          enum:
+            - ibm_params
+          nullable: false
+        temperature:
+          description: >-
+            What sampling temperature to use, between 0 and 1. Higher values
+            like 0.8 will make the output more random, while lower values like
+            0.2 will make it more focused and deterministic. We generally
+            recommend altering this or `top_p` but not both.
+          type: number
+          example: 0.5
+          nullable: true
+        top_p:
+          description: >-
+            An alternative to sampling with temperature, called nucleus
+            sampling, where the model considers the results of the tokens with
+            `top_p` probability mass. So 0.1 means only the tokens comprising
+            the top 10% probability mass are considered. We generally recommend
+            altering this or temperature but not both.
+          type: number
+          example: 0.5
+          maximum: 1
+          minimum: 0.1
+          nullable: true
+        top_k:
+          description: >-
+            `Top-K` changes how the model selects tokens for output. A low
+            `top-K` means the next selected token is the most probable among all
+            tokens in the model's vocabulary (also called greedy decoding),
+            while a high `top-K` means that the next token is selected from
+            among the three most probable tokens by using temperature.
+          type: number
+          example: 1
+          nullable: true
+      required:
+        - type
+      title: AI LLM endpoint params IBM
+      x-box-resource-id: ai_llm_endpoint_params_ibm
+  securitySchemes:
+    OAuth2Security:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://account.box.com/api/oauth2/authorize
+          tokenUrl: https://api.box.com/oauth2/token
+          scopes:
+            root_readonly: Read all files and folders stored in Box
+            root_readwrite: Read and write all files and folders stored in Box
+            manage_app_users: Provision and manage app users
+            manage_managed_users: Provision and manage managed users
+            manage_groups: Manage an enterprise's groups
+            manage_webhook: Create webhooks programmatically through the API
+            manage_enterprise_properties: Manage enterprise properties
+            manage_data_retention: Manage data retention polices
+            manage_legal_hold: Manage Legal Holds
+
+````
+
+
+## Extract metadata structured — tutorial
+## Source: https://developer.box.com/guides/box-ai/ai-tutorials/extract-metadata-structured.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Extract metadata from file (structured)
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+With Box AI API, you can extract metadata from the provided file
+and get the result in the form of key-value pairs.
+As input, you can either create a structure using the `fields` parameter, or use an already defined metadata template.
+To learn more about creating templates, see [Creating metadata templates in the Admin Console][templates-console] or use the <Link href="/guides/metadata/templates/create">metadata template API</Link>. You can also [autofill metadata in templates][autofill-metadata] using our Standard or Enhanced Extraction Agent.
+
+## Supported file formats
+
+The endpoint supports the following file formats:
+
+* PDF
+* TIFF
+* PNG
+* JPEG
+
+Box AI automatically applies optical character recognition (OCR) when processing image files (TIFF, PNG, JPEG) and scanned documents. This eliminates the need to convert images to PDF before extraction, saving time and simplifying your integration.
+
+## Supported languages
+
+Box AI can extract metadata from documents in the following languages:
+
+* English
+* Japanese
+* Chinese
+* Korean
+
+- Cyrillic-based languages (such as Russian, Ukrainian, Bulgarian, and Serbian)
+
+No additional configuration is required to use different languages or image formats. Box AI automatically detects the language and applies OCR when needed.
+
+## Before you start
+
+Make sure you followed the steps listed in <Link href="/guides/box-ai/ai-tutorials/prerequisites">getting started with Box AI</Link> to create a platform app and authenticate.
+
+## Send a request
+
+To send a request, use the
+`POST /2.0/ai/extract_structured` endpoint.
+
+<CodeGroup>
+  ```sh cURL theme={null}
+  curl -i -L 'https://api.box.com/2.0/ai/extract_structured' \
+       -H 'content-type: application/json' \
+       -H 'authorization: Bearer <ACCESS_TOKEN>' \
+       -d '{
+          "items": [
+            {
+              "id": "12345678",
+              "type": "file",
+              "content": "This is file content."
+            }
+          ],
+          "metadata_template": {
+              "template_key": "",
+              "type": "metadata_template",
+              "scope": ""
+          },
+          "fields": [
+              {
+                "key": "name",
+                "description": "The name of the person.",
+                "displayName": "Name",
+                "prompt": "The name is the first and last name from the email address.",
+                "type": "string",
+                "options": [
+                  {
+                    "key": "First Name"
+                  },
+                  {
+                    "key": "Last Name"
+                  }
+                ]
+              }
+          ],
+          "ai_agent": {
+            "type": "ai_agent_extract_structured",
+            "long_text": {
+              "model": "azure__openai__gpt_4o_mini"
+              },
+            "basic_text": {
+              "model": "azure__openai__gpt_4o_mini"
+           }
+        }
+     }'
+  ```
+
+  ```typescript Node/TypeScript v10 theme={null}
+  await client.ai.createAiExtractStructured({
+    fields: [
+      {
+        key: 'firstName',
+        displayName: 'First name',
+        description: 'Person first name',
+        prompt: 'What is the your first name?',
+        type: 'string',
+      } satisfies AiExtractStructuredFieldsField,
+      {
+        key: 'lastName',
+        displayName: 'Last name',
+        description: 'Person last name',
+        prompt: 'What is the your last name?',
+        type: 'string',
+      } satisfies AiExtractStructuredFieldsField,
+      {
+        key: 'dateOfBirth',
+        displayName: 'Birth date',
+        description: 'Person date of birth',
+        prompt: 'What is the date of your birth?',
+        type: 'date',
+      } satisfies AiExtractStructuredFieldsField,
+      {
+        key: 'age',
+        displayName: 'Age',
+        description: 'Person age',
+        prompt: 'How old are you?',
+        type: 'float',
+      } satisfies AiExtractStructuredFieldsField,
+      {
+        key: 'hobby',
+        displayName: 'Hobby',
+        description: 'Person hobby',
+        prompt: 'What is your hobby?',
+        type: 'multiSelect',
+        options: [
+          { key: 'guitar' } satisfies AiExtractStructuredFieldsOptionsField,
+          { key: 'books' } satisfies AiExtractStructuredFieldsOptionsField,
+        ],
+      } satisfies AiExtractStructuredFieldsField,
+    ],
+    items: [new AiItemBase({ id: file.id })],
+    aiAgent: agentIgnoringOverridingEmbeddingsModel,
+  } satisfies AiExtractStructured);
+  ```
+
+  ```python Python v10 theme={null}
+  client.ai.create_ai_extract_structured(
+      [AiItemBase(id=file.id)],
+      fields=[
+          CreateAiExtractStructuredFields(
+              key="firstName",
+              display_name="First name",
+              description="Person first name",
+              prompt="What is the your first name?",
+              type="string",
+          ),
+          CreateAiExtractStructuredFields(
+              key="lastName",
+              display_name="Last name",
+              description="Person last name",
+              prompt="What is the your last name?",
+              type="string",
+          ),
+          CreateAiExtractStructuredFields(
+              key="dateOfBirth",
+              display_name="Birth date",
+              description="Person date of birth",
+              prompt="What is the date of your birth?",
+              type="date",
+          ),
+          CreateAiExtractStructuredFields(
+              key="age",
+              display_name="Age",
+              description="Person age",
+              prompt="How old are you?",
+              type="float",
+          ),
+          CreateAiExtractStructuredFields(
+              key="hobby",
+              display_name="Hobby",
+              description="Person hobby",
+              prompt="What is your hobby?",
+              type="multiSelect",
+              options=[
+                  CreateAiExtractStructuredFieldsOptionsField(key="guitar"),
+                  CreateAiExtractStructuredFieldsOptionsField(key="books"),
+              ],
+          ),
+      ],
+      ai_agent=agent_ignoring_overriding_embeddings_model,
+  )
+  ```
+
+  ```cs .NET v10 theme={null}
+  await client.Ai.CreateAiExtractStructuredAsync(requestBody: new AiExtractStructured(items: Array.AsReadOnly(new [] {new AiItemBase(id: file.Id)})) { Fields = Array.AsReadOnly(new [] {new AiExtractStructuredFieldsField(key: "firstName") { DisplayName = "First name", Description = "Person first name", Prompt = "What is the your first name?", Type = "string" },new AiExtractStructuredFieldsField(key: "lastName") { DisplayName = "Last name", Description = "Person last name", Prompt = "What is the your last name?", Type = "string" },new AiExtractStructuredFieldsField(key: "dateOfBirth") { DisplayName = "Birth date", Description = "Person date of birth", Prompt = "What is the date of your birth?", Type = "date" },new AiExtractStructuredFieldsField(key: "age") { DisplayName = "Age", Description = "Person age", Prompt = "How old are you?", Type = "float" },new AiExtractStructuredFieldsField(key: "hobby") { DisplayName = "Hobby", Description = "Person hobby", Prompt = "What is your hobby?", Type = "multiSelect", Options = Array.AsReadOnly(new [] {new AiExtractStructuredFieldsOptionsField(key: "guitar"),new AiExtractStructuredFieldsOptionsField(key: "books")}) }}) });
+  ```
+
+  ```swift Swift v10 theme={null}
+  try await client.ai.createAiExtractStructured(requestBody: AiExtractStructured(fields: [AiExtractStructuredFieldsField(key: "firstName", displayName: "First name", description: "Person first name", prompt: "What is the your first name?", type: "string"), AiExtractStructuredFieldsField(key: "lastName", displayName: "Last name", description: "Person last name", prompt: "What is the your last name?", type: "string"), AiExtractStructuredFieldsField(key: "dateOfBirth", displayName: "Birth date", description: "Person date of birth", prompt: "What is the date of your birth?", type: "date"), AiExtractStructuredFieldsField(key: "age", displayName: "Age", description: "Person age", prompt: "How old are you?", type: "float"), AiExtractStructuredFieldsField(key: "hobby", displayName: "Hobby", description: "Person hobby", prompt: "What is your hobby?", type: "multiSelect", options: [AiExtractStructuredFieldsOptionsField(key: "guitar"), AiExtractStructuredFieldsOptionsField(key: "books")])], items: [AiItemBase(id: file.id)]))
+  ```
+
+  ```java Java v10 theme={null}
+  client.getAi().createAiExtractStructured(new AiExtractStructured.Builder(Arrays.asList(new AiItemBase(file.getId()))).fields(Arrays.asList(new AiExtractStructuredFieldsField.Builder("firstName").description("Person first name").displayName("First name").prompt("What is the your first name?").type("string").build(), new AiExtractStructuredFieldsField.Builder("lastName").description("Person last name").displayName("Last name").prompt("What is the your last name?").type("string").build(), new AiExtractStructuredFieldsField.Builder("dateOfBirth").description("Person date of birth").displayName("Birth date").prompt("What is the date of your birth?").type("date").build(), new AiExtractStructuredFieldsField.Builder("age").description("Person age").displayName("Age").prompt("How old are you?").type("float").build(), new AiExtractStructuredFieldsField.Builder("hobby").description("Person hobby").displayName("Hobby").prompt("What is your hobby?").type("multiSelect").options(Arrays.asList(new AiExtractStructuredFieldsOptionsField("guitar"), new AiExtractStructuredFieldsOptionsField("books"))).build())).aiAgent(agentIgnoringOverridingEmbeddingsModel).build())
+  ```
+
+  ```java Java v5 theme={null}
+  BoxAIExtractMetadataTemplate template = new BoxAIExtractMetadataTemplate("templateKey", "enterprise");
+  BoxAIExtractStructuredResponse result = BoxAI.extractMetadataStructured(
+      api,
+      Collections.singletonList(new BoxAIItem("123456", BoxAIItem.Type.FILE)),
+      template
+  );
+  JsonObject sourceJson = result.getSourceJson();
+  ```
+</CodeGroup>
+
+### Parameters
+
+To make a call, you must pass the following parameters. Mandatory parameters are in **bold**.
+
+<Note>
+  The `items` array can have exactly one element.
+</Note>
+
+| Parameter                            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Example                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| **`metadata_template`**              | The metadata template containing the fields to extract. For your request to work, you must provide either `metadata_template` or `fields`, but not both.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |                                                          |
+| **`metadata_template.type`**         | The type of metadata template.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `metadata_template`                                      |
+| **`metadata_template.scope`**        | The scope of the metadata template that can either be `global` or `enterprise`. Global templates are those available to any Box enterprise, whereas `enterprise` templates are bound to a specific enterprise.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `metadata_template`                                      |
+| **`metadata_template.template_key`** | The name of your metadata template.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `invoice`                                                |
+| **`items.id`**                       | Box file ID of the document. The ID must reference an actual file with an extension.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `1233039227512`                                          |
+| **`items.type`**                     | The type of the supplied input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `file`                                                   |
+| `ai_agent`                           | The AI agent used to override the default agent configuration. This parameter allows you to, for example, replace the default LLM with a custom one using the <Link href="/reference/resources/ai_agent_text_gen#param_basic_gen_model">`model`</Link> parameter, tweak the base <Link href="/reference/resources/ai_agent_text_gen#param_basic_gen_prompt_template">`prompt`</Link> to allow for a more customized user experience, or change an LLM parameter, such as `temperature`, to make the results more or less creative. Before you use the `ai_agent` parameter, you can get the default configuration using the <Link href="/reference/get-ai-agent-default">`GET 2.0/ai_agent_default`</Link> request. For specific use cases, see the <Link href="/guides/box-ai/ai-agents/ai-agent-overrides">AI model overrides tutorial</Link>. |                                                          |
+| `include_confidence_score`           | A flag to indicate whether to include the confidence score for every extracted field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `true`                                                   |
+| `include_reference`                  | A flag to indicate whether to include references for every extracted field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `true`                                                   |
+| `items.content`                      | The content of the item, often the text representation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `This article is about Box AI`.                          |
+| `fields.description`                 | A description of the field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `The person's name.`                                     |
+| `fields.displayName`                 | The display name of the field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `Name`                                                   |
+| `fields.key`                         | A unique identifier for the field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `name`                                                   |
+| `fields.options`                     | A list of options for this field. This is most often used in combination with the `enum` and `multiSelect` field types.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `[{"key":"First Name"},{"key":"Last Name"}]`             |
+| `fields.options.key`                 | A unique identifier for the field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `First Name`                                             |
+| `fields.prompt`                      | Additional context about the key (identifier) that may include how to find and format it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `Name is the first and last name from the email address` |
+| `fields.type`                        | The type of the field. It includes but is not limited to `string`, `float`, `date`, `enum`, and `multiSelect`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `string`                                                 |
+
+## Use cases
+
+This example shows you how to extract metadata from a sample invoice in a structured way.
+Let's assume you want to extract the vendor name, invoice number, and a few more details.
+
+<Frame>
+    <img src="https://mintcdn.com/box/KBEcg4yicgc_HMRY/images/guides/box-ai/sample-invoice.png?fit=max&auto=format&n=KBEcg4yicgc_HMRY&q=85&s=e1b68cfc71a4c252f355407447ec0eab" alt="sample invoice" width="2653" height="826" data-path="images/guides/box-ai/sample-invoice.png" />
+</Frame>
+
+### Create the request
+
+To get the response from Box AI, call `POST /2.0/ai/extract_structured` endpoint with the following parameters:
+
+* `items.type` and `items.id` to specify the file to extract the data from.
+* `fields` to specify the data that you want to extract from the given file.
+* `metadata_template` to supply an already existing metadata template.
+
+<Note>
+  You can use either `fields` or `metadata_template` to specify your structure, but not both.
+</Note>
+
+### Use `fields` parameter
+
+The `fields` parameter allows you to specify the data you want to extract. Each `fields` object has a subset of parameters you can use to add more information about the searched data.
+For example, you can add the field type, description, or even a prompt with some additional context.
+
+```bash  theme={null}
+curl --location 'https://api.box.com/2.0/ai/extract_structured' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>'' \
+--data '{
+    "items": [
+        {
+            "id": "1517628697289",
+            "type": "file"
+        }
+    ],
+    "fields": [
+        {
+            "key": "document_type",
+            "type": "enum",
+            "prompt": "what type of document is this?",
+            "options": [
+                {
+                    "key": "Invoice"
+                },
+                {
+                    "key": "Purchase Order"
+                },
+                {
+                    "key": "Unknown"
+                }
+            ]
+        },
+        {
+            "key": "document_date",
+            "type": "date"
+        },
+        {
+            "key": "vendor",
+            "description": "The name of the entity.",
+            "prompt": "Which vendor is sending this document.",
+            "type": "string"
+        },
+        {
+            "key": "document_total",
+            "type": "float"
+        }
+    ]
+  }'
+```
+
+The response lists the specified fields and their values:
+
+```bash  theme={null}
+{
+    "document_date": "2024-02-13",
+    "vendor": "Quasar Innovations",
+    "document_total": $1050,
+    "document_type": "Purchase Order"
+}
+```
+
+### Use metadata template
+
+If you prefer to use a metadata template, you can provide its `template_key`, `type`, and `scope`.
+
+```bash  theme={null}
+curl --location 'https://api.box.com/2.0/ai/extract_structured' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data '{
+    "items": [
+        {
+            "id": "1517628697289",
+            "type": "file"
+        }
+    ],
+    "metadata_template": {
+        "template_key": "rbInvoicePO",
+        "type": "metadata_template",
+        "scope": "enterprise_1134207681"
+    }
+}'
+```
+
+The response lists the fields included in the metadata template and their values:
+
+```bash  theme={null}
+{
+  "documentDate": "February 13, 2024",
+  "total": "$1050",
+  "documentType": "Purchase Order",
+  "vendor": "Quasar Innovations",
+  "purchaseOrderNumber": "003"
+}
+```
+
+### Enhanced Extract Agent
+
+To use the Enhanced Extract Agent, specify the `ai_agent` object as follows:
+
+```bash  theme={null}
+{
+  "ai_agent": {
+    "type": "ai_agent_id", 
+    "id": "enhanced_extract_agent"
+  }
+}
+```
+
+To extract data using the Enhanced Extract Agent you need one of the following:
+
+* [Inline field definitions][inline-field] (best when fields change frequently)
+* [Metadata template][metadata-template] (best when fields stay consistent)
+
+See the sample code snippet using Box Python SDK:
+
+```Python  theme={null}
+from box_sdk_gen import (
+    AiAgentReference,
+    AiAgentReferenceTypeField,
+    AiItemBase,
+    AiItemBaseTypeField,
+    BoxClient,
+    BoxCCGAuth,
+    CCGConfig,
+    CreateAiExtractStructuredMetadataTemplate
+)
+
+# Create your client credentials grant config from the developer console
+ccg_config = CCGConfig(
+    client_id="my_box_client_id", # replace with your client id
+    client_secret="my_box_client_secret", # replace with your client secret
+    user_id="my_box_user_id", # replace with the box user id that has access
+                              # to the file you are referencing
+)
+auth = BoxCCGAuth(config=ccg_config)
+client = BoxClient(auth=auth)
+# Create the agent config referencing the enhanced extract agent
+enhanced_extract_agent_config = AiAgentReference(
+    id="enhanced_extract_agent",
+    type=AiAgentReferenceTypeField.AI_AGENT_ID
+)
+# Use the Box SDK to call the extract_structured endpoint
+box_ai_response = client.ai.create_ai_extract_structured(
+    # Create the items array containing the file information to extract from
+    items=[
+        AiItemBase(
+            id="my_box_file_id", # replace with the file id
+            type=AiItemBaseTypeField.FILE
+        )
+    ],
+    # Reference the Box Metadata template 
+    metadata_template=CreateAiExtractStructuredMetadataTemplate(
+        template_key="InvoicePO",
+        scope="enterprise"
+    ),
+    # Attach the agent config you created earlier
+    ai_agent=enhanced_extract_agent_config,
+)
+print(f"box_ai_response: {box_ai_response.answer}")
+```
+
+[templates-console]: https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates
+
+[changelog]: https://developer.box.com/changelog
+
+[blog]: https://medium.com/box-developer-blog
+
+[inline-field]: #use-fields-parameter
+
+[metadata-template]: #use-metadata-template
+
+[autofill-metadata]: https://support.box.com/hc/en-us/articles/360044196173-Using-Metadata#h_01JJSRYKDKXHGJT9ZHCW1E9RX5
+
+<RelatedLinks
+  title="RELATED APIS"
+  items={[
+  { label: translate("Extract metadata (freeform)"), href: "/reference/post-ai-extract", badge: "POST" }
+]}
+/>
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Get started with Box AI"), href: "/guides/box-ai/ai-tutorials/prerequisites", badge: "GUIDE" },
+  { label: translate("Override AI model configuration"), href: "/guides/box-ai/ai-tutorials/default-agent-overrides", badge: "GUIDE" },
+  { label: translate("Generate text with Box AI"), href: "/guides/box-ai/ai-tutorials/generate-text", badge: "GUIDE" },
+  { label: translate("Ask questions to Box AI"), href: "/guides/box-ai/ai-tutorials/ask-questions", badge: "GUIDE" },
+  { label: translate("Extract metadata from file (freeform)"), href: "/guides/box-ai/ai-tutorials/extract-metadata", badge: "GUIDE" }
+]}
+/>
+
+
+## AI agent model overrides — guide
+## Source: https://developer.box.com/guides/box-ai/ai-agents/index.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# AI model overrides
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+Box updates the default models across the endpoints on a regular basis to stay up to date with the most advanced options.
+
+If your implementation is based on Box AI, a new default model might alter the results in a way that could break or change a downstream process. Switching to a specific version may prevent encountering any issues.
+
+Selecting a specific model may also bring better results to your use case. This is why, you can switch to any model included in the <Link href="/guides/box-ai/ai-models">supported models</Link> list.
+
+Apart from switching models, you can pass options to further customize the agents used in Box AI implementation and get the responses that suit your use case.
+
+To see specific use cases, check the <Link href="/guides/box-ai/ai-agents/ai-agent-overrides">overrides tutorial</Link>.
+
+[ask]: /reference/post-ai-ask#param-ai-agent
+
+[text-gen]: /reference/post-ai-text-gen#param-ai-agent
+
+[agent-default]: /guides/box-ai/ai-agents/get-agent-default-config
+
+<RelatedLinks
+  title="RELATED APIS"
+  items={[
+  { label: translate("Get AI agent default configuration"), href: "/reference/get-ai-agent-default", badge: "GET" },
+  { label: translate("Generate text"), href: "/reference/post-ai-text-gen", badge: "POST" },
+  { label: translate("Ask question"), href: "/reference/post-ai-ask", badge: "POST" },
+  { label: translate("Extract metadata (freeform)"), href: "/reference/post-ai-extract", badge: "POST" },
+  { label: translate("Extract metadata (structured)"), href: "/reference/post-ai-extract-structured", badge: "POST" }
+]}
+/>
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Get default AI agent configuration"), href: "/guides/box-ai/ai-agents/get-agent-default-config", badge: "GUIDE" },
+  { label: translate("Override AI model configuration"), href: "/guides/box-ai/ai-agents/ai-agent-overrides", badge: "GUIDE" }
+]}
+/>
+
+
+## Override AI model configuration
+## Source: https://developer.box.com/guides/box-ai/ai-agents/ai-agent-overrides.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Override AI model configuration
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+The `ai_agent` configuration allows you to override the default AI model configuration. It is available for the following endpoints:
+
+* <Link href="/reference/post-ai-ask#param-ai-agent">`POST ai/ask`</Link>
+* <Link href="/reference/post-ai-text-gen#param-ai-agent">`POST ai/text_gen`</Link>
+* <Link href="/reference/post-ai-extract#param-ai-agent">`POST ai/extract`</Link>
+* <Link href="/reference/post-ai-extract-structured#param-ai-agent">`POST ai/extract_structured`</Link>
+
+<Tip>
+  Use the <Link href="/reference/get-ai-agent-default">`GET ai_agent_default`</Link> endpoint to fetch the default configuration.
+</Tip>
+
+The override examples include:
+
+* Replacing the default AI model with a custom one based on your organization's needs.
+* Tweaking the base `prompt` to allow a more customized user experience.
+* Changing a parameter, such as `temperature`, to make the results more or less creative.
+
+## Sample configuration
+
+A complete configuration for `ai/ask` is as follows:
+
+```sh  theme={null}
+{
+  "type": "ai_agent_ask",
+  "basic_text": {
+    "llm_endpoint_params": {
+      "type": "openai_params",
+      "frequency_penalty": 1.5,
+      "presence_penalty": 1.5,
+      "stop": "<|im_end|>",
+      "temperature": 0,
+      "top_p": 1
+    },
+    "model": "azure__openai__gpt_4o_mini",
+    "num_tokens_for_completion": 8400,
+    "prompt_template": "It is `{current_date}`, consider these travel options `{content}` and answer the `{user_question}`.",
+    "system_message": "You are a helpful travel assistant specialized in budget travel"
+  },
+  "basic_text_multi": {
+    "llm_endpoint_params": {
+      "type": "openai_params",
+      "frequency_penalty": 1.5,
+      "presence_penalty": 1.5,
+      "stop": "<|im_end|>",
+      "temperature": 0,
+      "top_p": 1
+    },
+    "model": "azure__openai__gpt_4o_mini",
+    "num_tokens_for_completion": 8400,
+    "prompt_template": "It is `{current_date}`, consider these travel options `{content}` and answer the `{user_question}`.",
+    "system_message": "You are a helpful travel assistant specialized in budget travel"
+  },
+  "long_text": {
+    "embeddings": {
+      "model": "openai__text_embedding_ada_002",
+      "strategy": {
+        "id": "basic",
+        "num_tokens_per_chunk": 64
+      }
+    },
+    "llm_endpoint_params": {
+      "type": "openai_params",
+      "frequency_penalty": 1.5,
+      "presence_penalty": 1.5,
+      "stop": "<|im_end|>",
+      "temperature": 0,
+      "top_p": 1
+    },
+    "model": "azure__openai__gpt_4o_mini",
+    "num_tokens_for_completion": 8400,
+    "prompt_template": "It is `{current_date}`, consider these travel options `{content}` and answer the `{user_question}`.",
+    "system_message": "You are a helpful travel assistant specialized in budget travel"
+  },
+  "long_text_multi": {
+    "embeddings": {
+      "model": "openai__text_embedding_ada_002",
+      "strategy": {
+        "id": "basic",
+        "num_tokens_per_chunk": 64
+      }
+    },
+    "llm_endpoint_params": {
+      "type": "openai_params",
+      "frequency_penalty": 1.5,
+      "presence_penalty": 1.5,
+      "stop": "<|im_end|>",
+      "temperature": 0,
+      "top_p": 1
+    },
+    "model": "azure__openai__gpt_4o_mini",
+    "num_tokens_for_completion": 8400,
+    "prompt_template": "It is `{current_date}`, consider these travel options `{content}` and answer the `{user_question}`.",
+    "system_message": "You are a helpful travel assistant specialized in budget travel"
+  }
+}
+```
+
+### Differences in parameter sets
+
+The set of parameters available for `ask`, `text_gen`, `extract`, `extract_structured` differs slightly, depending on the API call.
+
+* The agent configuration for the `ask` endpoint includes `basic_text`,   `basic_text_multi`, `long_text` and `long_text_multi` parameters. This is because of the `mode` parameter you use to specify if the request is for a single item or multiple items. If you selected `multiple_item_qa` as the `mode`, you can also use `multi` parameters for overrides.
+
+* The agent configuration for `text_gen` includes the `basic_gen` parameter
+  that is used to generate text.
+
+### LLM endpoint params
+
+The `llm_endpoint_params` configuration options differ depending on the overall AI model being <Link href="/reference/resources/ai-llm-endpoint-params-google">Google</Link>, <Link href="/reference/resources/ai-llm-endpoint-params-openai">OpenAI</Link> or <Link href="/reference/resources/ai-llm-endpoint-params-aws">AWS</Link> based.
+
+For example, both `llm_endpoint_params` objects accept a `temperature` parameter, but the outcome differs depending on the model.
+
+For Google and AWS models, the [`temperature`][google-temp] is used for sampling during response generation, which occurs when `top-P` and `top-K` are applied. Temperature controls the degree of randomness in the token selection.
+
+For OpenAI models, [`temperature`][openai-temp] is the sampling temperature with values between 0 and 2. Higher values like 0.8 make the output more random, while lower values like 0.2 make it more focused and deterministic. When introducing your own configuration, use `temperature` or or `top_p` but not both.
+
+### System message
+
+The `system_message` parameter's aim is to help the LLM understand its role and what it’s supposed to do.
+For example, if your solution is processing travel itineraries, you can add a system message saying:
+
+```sh  theme={null}
+You are a travel agent aid. You are going to help support staff process large amounts of schedules, tickets, etc.
+```
+
+This message is separate from the content you send in, but it can improve the results.
+
+### Number of tokens for completion
+
+The `num_tokens_for_completion` parameter represents the number of [tokens][openai-tokens] Box AI can return. This number can vary based on the model used.
+
+[openai-tokens]: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+
+[google-temp]: https://ai.google.dev/gemini-api/docs/models/generative-models#model-parameters
+
+[openai-temp]: https://community.openai.com/t/temperature-top-p-and-top-k-for-chatbot-responses/295542
+
+<RelatedLinks
+  title="RELATED APIS"
+  items={[
+  { label: translate("Get AI agent default configuration"), href: "/reference/get-ai-agent-default", badge: "GET" },
+  { label: translate("Generate text"), href: "/reference/post-ai-text-gen", badge: "POST" },
+  { label: translate("Ask question"), href: "/reference/post-ai-ask", badge: "POST" }
+]}
+/>
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Get started with Box AI"), href: "/guides/box-ai/ai-tutorials/prerequisites", badge: "GUIDE" },
+  { label: translate("Ask questions to Box AI"), href: "/guides/box-ai/ai-tutorials/ask-questions", badge: "GUIDE" },
+  { label: translate("Generate text with Box AI"), href: "/guides/box-ai/ai-tutorials/generate-text", badge: "GUIDE" },
+  { label: translate("Override AI model configuration"), href: "/guides/box-ai/ai-tutorials/default-agent-overrides", badge: "GUIDE" }
+]}
+/>
+
+
+## Box AI overview
+## Source: https://developer.box.com/guides/box-ai/index.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Box AI
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+Box AI API allows you to use Box AI
+functionality
+in your platform applications. For example, you can
+implement Box AI question and answer
+functionality in your third party application,
+or generate content right in
+your product’s content editor.
+
+## Box AI API capabilities
+
+Box AI API provides a number of capabilities
+designed to help you leverage Large Language Models (LLMs)
+in your application workflows.
+
+You can ask Box AI to answer
+user questions, summarize the document content,
+or generate text you can use in your documents.
+You can also use Box AI to extract metadata from the
+provided input, such as a schema or metadata template.
+
+The <Link href="/guides/embed/ui-elements/preview#box-ai-ui-element">Box AI for UI Elements</Link> functionality
+allows embedding Box AI in your apps.
+
+### Ask questions to Box AI
+
+You can use Box AI API to ask questions about
+the content, for example, while working
+on documents you store in Box.
+
+Box AI can answer your questions about the
+content or generate a summary based on the
+file you supply.
+
+<Frame>
+    <img src="https://mintcdn.com/box/KBEcg4yicgc_HMRY/images/guides/box-ai/box-ai-in-doc.png?fit=max&auto=format&n=KBEcg4yicgc_HMRY&q=85&s=92f515d9132bb3636ea4ac129fee038a" alt="box ai in documents" width="2260" height="324" data-path="images/guides/box-ai/box-ai-in-doc.png" />
+</Frame>
+
+Have a look at [Box AI for Documents][boxaidocs]
+to see an example of how users can interact
+with Box AI while
+working with their documents.
+
+### Generate text with Box AI
+
+You can use Box AI API to generate text
+from scratch, from existing text within a Box Note, or
+based on a given document in Preview.
+For example, you can ask Box AI to create a template
+or meeting agenda based on an article you are viewing in
+Preview.
+
+Another example is Box Notes that uses Box AI
+to generate text
+and refine the already existing note content.
+For details, see [Box AI for Notes][boxainotes].
+
+<Frame>
+    <img src="https://mintcdn.com/box/KBEcg4yicgc_HMRY/images/guides/box-ai/box-ai-in-notes.png?fit=max&auto=format&n=KBEcg4yicgc_HMRY&q=85&s=7f4da41ebd3b2d87e5cc73b48618c76e" alt="box ai in notes" width="1392" height="382" data-path="images/guides/box-ai/box-ai-in-notes.png" />
+</Frame>
+
+### Metadata extraction
+
+The <Link href="/reference/post-ai-extract">`POST /2.0/ai/extract`</Link> and <Link href="/reference/post-ai-extract-structured">`POST /2.0/ai/extract_structured`</Link> endpoints allow you to extract data from the provided input and return them in a form of key-value pairs.
+
+* Use the `extract_structured` endpoint to extract data according to a pre-defined structure obtained from the metadata template, or a set of fields. Use it for shorter documents
+* Use the Enhanced Extract Agent for long, complex documents
+* Use the `extract` endpoint to extract data from a file using a prompt that can include a stringified version of formats such as JSON or XML, or even plain text.
+
+#### Enhanced Extract Agent
+
+The Enhanced Extract Agent is designed to extract key-value pairs from complex documents. It converts the unstructured content into metadata for easier discovery and search.
+
+You can <Link href="/guides/box-ai/ai-tutorials/extract-metadata-structured#">use the agent</Link> through the Box AI API and turn unstructured data into structured output to use in production databases, third party systems, or analytics.
+
+The Enhanced Extract Agent uses Gemini 2.5 Pro to provide a chain-of-thought reasoning and returns both the extracted values and a reasoning behind
+its answer.
+
+### Configuration overrides
+
+You can use the `ai_agent` parameter available in the Box AI API requests to override the default agent configuration and introduce your own custom settings.
+
+For details, see <Link href="/guides/box-ai/ai-agents/get-agent-default-config">AI agent default configuration</Link>.
+
+### Box AI for UI Elements
+
+Box AI for UI Elements is available in Content Preview
+allows asking questions about documents directly
+within platform applications.
+Check out how to use the <Link href="/guides/embed/ui-elements/preview#box-ai-ui-element">Box AI for UI Elements</Link>
+to embed Box AI functionality in your projects.
+
+## Supported languages
+
+Box AI works in a number of languages including
+English, Japanese, French, Spanish, and many more.
+However, the underlying models are primarily
+trained on English language documents. This means
+that prompts in other languages may return answers
+of lower quality than in English. Tests have shown
+satisfactory results for summarizing, checking grammar
+and spelling, and answering questions, but bear in mind
+that the results may be different than in English.
+
+<Tip>
+  Switch the language to Japanese to get
+  better results for this language.
+</Tip>
+
+## Box AI API in User Activity Report (UAR)
+
+[User Activity Reports][uar] provide an overview of the actions the users are taking in Box. Box Admins use this report to view the actions taken by their users within a given time period, and this includes interactions with Box AI. The report contains the following action types that Box admins can select to get details for Box AI:
+
+* **AI query**: The user queried Box AI and received a response.
+* **Failed AI query**: The user queried Box AI but did not receive a response.
+
+[boxainotes]: https://support.box.com/hc/en-us/articles/22198577315347-Box-AI-for-Notes
+
+[boxaidocs]: https://support.box.com/hc/en-us/articles/22158484213267-Box-AI-for-Documents
+
+[uar]: https://support.box.com/hc/en-us/articles/4415012490387-User-Activity-Report
+
+<RelatedLinks
+  title="RELATED APIS"
+  items={[
+  { label: translate("Generate text"), href: "/reference/post-ai-text-gen", badge: "POST" },
+  { label: translate("Ask question"), href: "/reference/post-ai-ask", badge: "POST" }
+]}
+/>
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Get started with Box AI"), href: "/guides/box-ai/ai-tutorials/prerequisites", badge: "GUIDE" },
+  { label: translate("Ask questions to Box AI"), href: "/guides/box-ai/ai-tutorials/ask-questions", badge: "GUIDE" },
+  { label: translate("Generate text with Box AI"), href: "/guides/box-ai/ai-tutorials/generate-text", badge: "GUIDE" },
+  { label: translate("Extract metadata from file (structured)"), href: "/guides/box-ai/ai-tutorials/extract-metadata-structured", badge: "GUIDE" },
+  { label: translate("Extract metadata from file (freeform)"), href: "/guides/box-ai/ai-tutorials/extract-metadata", badge: "GUIDE" }
+]}
+/>
+
+
+## Google Gemini 2.5 Pro model card
+## Source: https://developer.box.com/guides/box-ai/ai-models/google-gemini-2-5-pro-model-card.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Google Gemini 2.5 Pro
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+**Google Gemini 2.5 Pro** is a multimodal model capable of solving complex problems. It can comprehend vast datasets and challenging problems from different information sources, including text, audio, images, video, and even entire code repositories.
+
+## Model details
+
+| Item                  | Value                                              | Description                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model name            | **Google Gemini 2.5 Pro**                          | The name of the model.                                                                                                                                                                               |
+| Model category        | **Premium**                                        | The category of the model: Standard or Premium.                                                                                                                                                      |
+| API model name        | `google__gemini_2_5_pro`                           | The name of the model that is used in the <Link href="/guides/box-ai/ai-agents/ai-agent-overrides">Box AI API for model overrides</Link>. The user must provide this exact name for the API to work. |
+| Compliance            | **ISMAP, FedRAMP Moderate, FedRAMP High, DoD IL5** | Government compliance frameworks and authorizations applicable to this model.                                                                                                                        |
+| Hosting layer         | **Google**                                         | The trusted organization that securely hosts LLM.                                                                                                                                                    |
+| Model provider        | **Google**                                         | The organization that provides this model.                                                                                                                                                           |
+| Release date          | **June 17th 2025**                                 | The release date for the model.                                                                                                                                                                      |
+| Knowledge cutoff date | **January 2025**                                   | The date after which the model does not get any information updates.                                                                                                                                 |
+| Input context window  | **1m tokens**                                      | The number of tokens supported by the input context window.                                                                                                                                          |
+| Maximum output tokens | **65k tokens**                                     | The number of tokens that can be generated by the model in a single request.                                                                                                                         |
+| Empirical throughput  | **Not specified**                                  | The number of tokens the model can generate per second.                                                                                                                                              |
+| Open source           | **No**                                             | Specifies if the model's code is available for public use.                                                                                                                                           |
+
+## Additional documentation
+
+For additional information, see [official Google Gemini 2.5 Pro documentation][vertex-ai-gemini-2-5-pro].
+
+[vertex-ai-gemini-2-5-pro]: https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-pro
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Ask questions to Box AI"), href: "/guides/box-ai/ai-tutorials/ask-questions", badge: "GUIDE" },
+  { label: translate("Generate text with Box AI"), href: "/guides/box-ai/ai-tutorials/generate-text", badge: "GUIDE" },
+  { label: translate("Extract metadata from file (freeform)"), href: "/guides/box-ai/ai-tutorials/extract-metadata", badge: "GUIDE" },
+  { label: translate("Extract metadata from file (structured)"), href: "/guides/box-ai/ai-tutorials/extract-metadata-structured", badge: "GUIDE" },
+  { label: translate("Get default AI agent configuration"), href: "/guides/box-ai/ai-agents/get-agent-default-config", badge: "GUIDE" }
+]}
+/>
+
+
+## Supported AI models
+## Source: https://developer.box.com/guides/box-ai/ai-models/index.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Supported AI models
+
+export const CustomCard = ({icon, title, href, tags, children, ...props}) => {
+  const handleClick = e => {
+    if (href) {
+      e.preventDefault();
+      window.location.href = href;
+    }
+  };
+  const getDescription = () => {
+    if (children) {
+      if (typeof children === "string") {
+        return children;
+      } else {
+        const childrenArray = Array.isArray(children) ? children : [children];
+        for (const child of childrenArray) {
+          if (typeof child === "string") {
+            return child;
+          } else if (child && typeof child === "object" && child.props?.children) {
+            const childText = child.props.children;
+            if (typeof childText === "string") {
+              return childText;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  };
+  const description = getDescription();
+  const isCustomSvg = icon?.includes('/') || icon?.includes('.svg');
+  const iconSize = isCustomSvg ? 48 : 24;
+  return <a href={href} onClick={handleClick} className="flex flex-col p-6 rounded-lg border transition-all duration-200 cursor-pointer text-inherit no-underline box-border mb-3
+        border-gray-200 dark:border-gray-700
+        bg-white dark:bg-gray-900
+        hover:border-blue-500 dark:hover:border-blue-400
+        hover:shadow-md dark:hover:shadow-lg" {...props}>
+      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <div className="flex items-center justify-center w-full h-full">
+          <Icon icon={icon} size={iconSize} />
+        </div>
+      </div>
+      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50 mb-3 text-left break-words mt-0">{title}</h3>
+      {description && <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{description}</div>}
+      {tags && tags.length > 0 && <div className="flex flex-wrap gap-2 mt-auto pt-4">
+          {tags.map((tag, index) => {
+    const bgColor = tag.bgColor || tag.backgroundColor || "#e5e7eb";
+    return <span key={index} className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide text-gray-900" style={{
+      backgroundColor: bgColor
+    }}>
+                {tag.text || tag.label}
+              </span>;
+  })}
+        </div>}
+    </a>;
+};
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+Box supports a variety of AI models, categorized along two dimensions: [access level](#access-levels) and [capability tier](#capability-tiers).
+
+## Access levels
+
+| Level                                                   | Description                                                                                                                           | Configuration Required |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| [**Core models**](#core-box-ai-models)                  | Built into Box AI and available by default for all customers                                                                          | None                   |
+| [**Customer-enabled models**](#customer-enabled-models) | Require activation by Box admins in the Admin Console or a request to Box. Some models may be subject to additional terms or pricing. | Yes                    |
+
+## Capability tiers
+
+| Tier                | Description                                                                       | Best For                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Standard models** | High-speed, cost-efficient performance                                            | Basic summarization, Q\&A, structured data extraction from shorter or simpler documents. High-volume, low-complexity use cases |
+| **Premium models**  | Advanced reasoning, larger context windows, better performance on complex content | Multi-step reasoning, large taxonomies, lengthy or unstructured documents, domain-specific content                             |
+
+<Note>
+  A model can be both customer-enabled and premium, or core and standard. In other words, access level and capability tiers are independent categorizations (for example, models can be either capability tier regardless of access level). The two categorizations are complementary.
+</Note>
+
+## Using models
+
+How to use the supported AI models:
+
+* Get the <Link href="/reference/get-ai-agent-default">default AI agent configuration</Link>.
+* Override the AI agent configuration used in <Link href="/reference/post-ai-ask">`POST 2.0/ai/ask`</Link>, <Link href="/reference/post-ai-text-gen">`POST 2.0/ai/text_gen`</Link>, <Link href="/reference/post-ai-extract">`POST 2.0/ai/extract`</Link>, <Link href="/reference/post-ai-extract-structured">`POST 2.0/ai/extract_structured`</Link> endpoints.
+
+When using the `model` parameter in your API calls, use the **API Name** visible on each model card listed below.
+
+For example, to get the AI agent configuration for a specific model, use the <Link href="/reference/get-ai-agent-default#param-model">model</Link> parameter and provide the `azure__openai__gpt_4o_mini` API name. Make sure you use **two underscores** after the provider name.
+
+<Note>
+  The list may change depending on the model availability.
+</Note>
+
+## Core models
+
+Box AI is powered by the following AI models. These models are integrated with Box AI to facilitate various use cases while adhering to enterprise grade standards. Below, you’ll find information about each model, including its capabilities, intended applications, and applicable usage guidelines.
+
+<Warning>
+  Models offered in **Preview** mode have not been fully performance-tested at scale. You may experience variability in output quality, availability, and accuracy.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="OpenAI">
+    <Columns cols={2}>
+      <Card title="openai__gpt_5_4" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-5-4-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model for both broad general-purpose work and most coding tasks
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="openai__gpt_5_2" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-5-2-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model for coding and agentic tasks across various industries
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="openai__gpt_5_1" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-5-1-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model with enterprise-grade performance and adaptive reasoning
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+
+      <Card title="openai__gpt_5" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-5-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model with advanced reasoning and long-context understanding
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+
+      <Card title="openai__gpt_5_mini" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-5-mini-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Model designed for well-defined tasks and precise prompts, suitable for lightweight tasks
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+
+      <Card title="azure__openai__gpt_4_1" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/azure-openai-gpt-4-1-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model, highly efficient in handling complex, multi-step tasks
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL2</Badge>
+        </span>
+      </Card>
+
+      <Card title="azure__openai__gpt_4_1_mini" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/azure-openai-gpt-4-1-mini-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model designed to handle lightweight tasks and precise prompts
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL2</Badge>
+        </span>
+      </Card>
+
+      <Card title="azure__openai__gpt_4o" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/azure-openai-gpt-4o-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model, highly efficient in handling complex, multi-step tasks
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL2</Badge>
+        </span>
+      </Card>
+
+      <Card title="azure__openai__gpt_4o_mini" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/azure-openai-gpt-4o-mini-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model for lightweight tasks and precise prompts, best suited for focused tasks
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL2</Badge>
+        </span>
+      </Card>
+
+      <Card title="azure__openai__text_embedding_ada_002" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/azure-text-embedding-ada-002-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        2nd-generation embedding model for text search, code search, and sentence similarity
+
+        <span className="badge-group">
+          <Badge color="gray">Embeddings</Badge>
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL2</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="Google">
+    <Columns cols={2}>
+      <Card title="google__gemini_2_5_pro" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-2-5-pro-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model with a 1 million token context window and advanced reasoning capabilities
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL5</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_2_5_flash" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-2-5-flash-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model offering well-round capabilites, including thinking capabilities
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL5</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_2_0_flash_001" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-2-0-flash-001-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model designed for optimal high-volume, high-frequency tasks at scale
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL5</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_2_0_flash_lite_preview" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-2-0-flash-lite-preview-02-05" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model designed to handle lightweight tasks
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="blue">FedRAMP High</Badge>
+          <Badge color="blue">DoD IL5</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="Anthropic">
+    <Columns cols={2}>
+      <Card title="aws__claude_4_6_opus" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-6-opus-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Multimodal model for complex tasks with a 1 million token context window
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_6_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-6-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Multimodal model for complex tasks with a 1 million token context window
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_5_opus" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-5-opus-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Premium model combining maximum intelligence with practical performance
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_5_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-5-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model that excels at complex agents, coding, and autonomous multi-step workflows
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_5_haiku" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-5-haiku-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Fast and cost-efficient model with near-frontier intelligence best for low-latency applications
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+          <Badge color="gray">Compatible with Box Agent</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_opus" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-opus-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model that excels at coding and complex problem-solving, powering frontier agents
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_4_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-4-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model that brings frontier performance to everyday use cases
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_3_7_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-3-7-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model designed to enhance language understanding and generation tasks
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_3_5_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-3-5-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model designed to enhance language understanding and generation tasks
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_3_haiku" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-3-haiku-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model tailored for various language tasks, creative writing, and conversational AI
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__claude_3_sonnet" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-claude-3-sonnet-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Model that brings frontier performance to everyday use cases
+
+        <span className="badge-group">
+          <Badge color="orange">Premium</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+
+      <Card title="aws__titan_text_lite" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/claude.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=bd3fefa10e30eac617a43ae7609ac43a" href="/guides/box-ai/ai-models/aws-titan-text-lite-model-card" width="640" height="640" data-path="static/guides-box-ai-ai-models/claude.svg">
+        Language model for advanced text processing and complex tasks with large context
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+          <Badge color="blue">ISMAP</Badge>
+          <Badge color="blue">FedRAMP Moderate</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="Meta">
+    <Columns cols={2}>
+      <Card title="ibm__llama_4_maverick" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/meta.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f7b4cbde68a60d7c515774808c8d50d1" href="/guides/box-ai/ai-models/ibm-llama-4-maverick-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/meta.svg">
+        Multimodal model with a 1 million token context window and advanced reasoning capabilities
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+
+      <Card title="ibm__llama_4_scout" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/meta.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f7b4cbde68a60d7c515774808c8d50d1" href="/guides/box-ai/ai-models/ibm-llama-4-scout-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/meta.svg">
+        Natively multimodal, mixture-of-experts (MoE) model designed to handle lightweight tasks
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+
+      <Card title="ibm__llama_3_2_90b_vision_instruct" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/meta.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f7b4cbde68a60d7c515774808c8d50d1" href="/guides/box-ai/ai-models/ibm-llama-3-2-90b-vision-instruct-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/meta.svg">
+        Multimodal model designed to handle lightweight tasks
+
+        <span className="badge-group">
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="Mistral AI">
+    <Columns cols={2}>
+      <Card title="ibm__mistral_medium_2505" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/mistral.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f130e27cd17d2cbcce4ad92affe1940b" href="/guides/box-ai/ai-models/ibm-mistral-medium-3-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/mistral.svg">
+        High-performance enterprise model for coding and advanced reasoning
+
+        <span className="badge-group">
+          <Badge color="red">Preview</Badge>
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+
+      <Card title="ibm__mistral_small_3_1_24b_instruct_2503" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/mistral.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f130e27cd17d2cbcce4ad92affe1940b" href="/guides/box-ai/ai-models/ibm-mistral-small-3-1-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/mistral.svg">
+        Fast open-source multimodal model with low latency
+
+        <span className="badge-group">
+          <Badge color="red">Preview</Badge>
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+</AccordionGroup>
+
+## Customer-enabled models
+
+Certain Box AI customers may enable additional AI models upon their request or upon the models otherwise being made available through their Admin Console. Use of these models may be subject to additional terms. By selecting a customer-enabled model, the customer acknowledges that their data may be processed by additional [subprocessors][subprocessors] of their choice.
+
+<Warning>
+  Models offered in **Beta** mode are provided on an as-is basis.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="OpenAI">
+    <Columns cols={2}>
+      <Card title="openai__gpt_o3" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/openai.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=84744284448f6109a9058cef53c3e01c" href="/guides/box-ai/ai-models/openai-gpt-o3-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/openai.svg">
+        Multimodal model, highly efficient in handling complex, multi-step tasks
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="Google">
+    <Columns cols={2}>
+      <Card title="google__gemini_3_1_pro" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-3-1-pro-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Model for complex tasks with advanced reasoning and a large context window
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_3_1_flash_lite" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-3-1-flash-lite-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Gemini multimodal model for high-speed and cost-efficient tasks
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="green">Standard</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_3_pro" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-3-pro-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model for complex tasks with a 1 million token context window
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+
+      <Card title="google__gemini_3_flash" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/gemini.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=0d2975259aaa026bd24aa72adedc55f6" href="/guides/box-ai/ai-models/google-gemini-3-flash-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/gemini.svg">
+        Multimodal model designed for speed and efficiency across a wide range of tasks
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+
+  <Accordion title="xAI">
+    <Columns cols={2}>
+      <Card title="xai__grok_3_beta" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/grok.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f11f53fd44df5708ae7379de920ada3d" href="/guides/box-ai/ai-models/xai-grok-3-beta-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/grok.svg">
+        Multimodal model for complex tasks with a 1 million token context window
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+
+      <Card title="xai__grok_3_mini_beta" arrow="true" icon="https://mintcdn.com/box/ZIWJfhT3Dv9f-PF4/static/guides-box-ai-ai-models/grok.svg?fit=max&auto=format&n=ZIWJfhT3Dv9f-PF4&q=85&s=f11f53fd44df5708ae7379de920ada3d" href="/guides/box-ai/ai-models/xai-grok-3-mini-beta-model-card" width="16" height="16" data-path="static/guides-box-ai-ai-models/grok.svg">
+        Multimodal model for complex tasks with a 1 million token context window
+
+        <span className="badge-group">
+          <Badge color="purple">Beta</Badge>
+          <Badge color="orange">Premium</Badge>
+        </span>
+      </Card>
+    </Columns>
+  </Accordion>
+</AccordionGroup>
+
+## Default models
+
+The following tables list the default AI models used when you do not override the agent configuration. The model that runs depends on the agent type, the provider, and the capability tier.
+
+<Note>Default settings shown below may not be applicable for certain customers with specific configurations or requirements.</Note>
+
+### Legacy agents
+
+Legacy agents represent the initial generation of Box AI capabilities, designed to handle basic, single-step tasks such as simple Q\&A and document summarization. The table below specifies available models for a particular use case.
+
+| Use case                            | Provider         | Model for Standard Version                                                                      | Model for Advanced or Enhanced Version                                                        |
+| ----------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Q\&A for Documents, Notes, and Hubs | OpenAI (Default) | <Link href="/guides/box-ai/ai-models/openai-gpt-5-mini-model-card">GPT 5.1-mini</Link>          | <Link href="/guides/box-ai/ai-models/openai-gpt-5-2-model-card">GPT 5.2</Link>                |
+|                                     | Claude           | <Link href="/guides/box-ai/ai-models/aws-claude-4-5-sonnet-model-card">Claude 4.5 Sonnet</Link> | <Link href="/guides/box-ai/ai-models/aws-claude-4-5-opus-model-card">Claude 4.5 Opus</Link>   |
+|                                     | Llama            | <Link href="/guides/box-ai/ai-models/ibm-llama-4-maverick-model-card">Llama 4 Maverick</Link>   | <Link href="/guides/box-ai/ai-models/ibm-llama-4-maverick-model-card">Llama 4 Maverick</Link> |
+
+### Box agents
+
+Box agents are the next generation of intelligent assistants built with advanced reasoning and orchestration, capable of planning and executing complex, multi-step workflows across your entire Box content ecosystem. The table below specifies available models for each specialized agent type.
+
+| Agent                         | Model for Standard Version                                                                       | Model for Pro or Enhanced Version                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Box Agent                     | <Link href="/guides/box-ai/ai-models/openai-gpt-5-4-model-card">GPT 5.4</Link>                   | <Link href="/guides/box-ai/ai-models/aws-claude-4-6-sonnet-model-card">Claude Sonnet 4.6</Link> |
+| Extract Agent                 | <Link href="/guides/box-ai/ai-models/google-gemini-2-5-flash-model-card">Gemini 2.5 Flash</Link> | <Link href="/guides/box-ai/ai-models/google-gemini-2-5-pro-model-card">Gemini 2.5 Pro</Link>    |
+| Security Classification Agent | <Link href="/guides/box-ai/ai-models/google-gemini-2-5-flash-model-card">Gemini 2.5 Flash</Link> | N/A                                                                                             |
+| Threat Analysis Agent         | <Link href="/guides/box-ai/ai-models/google-gemini-2-5-flash-model-card">Gemini 2.5 Flash</Link> | N/A                                                                                             |
+
+[azure-ai-mini-4o-model]: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-4o-and-gpt-4-turbo
+
+[vertex-ai-model]: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models#models
+
+[vertex-ai-gemini-models]: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models#gemini-models
+
+[vertex-text-models]: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text
+
+[azure-ai-embeddings]: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#embeddings
+
+[aws-claude]: https://aws.amazon.com/bedrock/claude/
+
+[aws-titan]: https://aws.amazon.com/bedrock/titan/
+
+[subprocessors]: https://www.box.com/legal/subprocessors
+
+
+## Rate Limits
+## Source: https://developer.box.com/guides/api-calls/permissions-and-errors/rate-limits.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Rate Limits
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+There are three common types of API call rate limitations that Box may use at
+its discretion to best protect network resources and preserve the quality of our
+customer experience.
+
+## User based
+
+These rate limits protect our service from issues that may arise when a single
+user generates too much traffic. The number of API calls that a user can make in
+a minute is limited as described below. These limits apply to all Box user
+accounts and are the most common. Generally, they are initiated when a
+user exceeds approximately 1000 API calls/minute, but certain API endpoints may
+have different rate limits.
+
+## Quality of service
+
+These rate limits are designed to protect the quality of service of our
+infrastructure. If there is resource contention in the infrastructure, we
+introduce automatic rate limits to prevent system degradation and outages.
+For instance, if an application happens to be accessing the same physical
+database server, such as the use of a file migration tool accessing related
+resources that access the same underlying physical resources, Box may impose
+temporary rate-limits when load spikes and adjust them as the system recovers.
+
+## Licensing based
+
+All Box Business Plans come with a licensed number of permitted API calls per
+enterprise per month. These license based rate limits are designed to prevent
+excessive overages and misuse of network resources. If Box's infrastructure
+detects that a tool used by or on behalf of a customer has exceeded that
+customer's API license allocation or is intending to circumvent network
+controls, additional selective rate-limiting may be imposed. You can see the
+default API allocations licensed with a particular account level at our
+[pricing page][pricing], but note that some customers purchase Platform API
+Pricing plans that increase their allocation. 
+
+## Per API rate limits
+
+There are currently a few distinct rate limits in place within the Box API.
+
+* General API calls
+  * 1000 API requests per minute, per user
+* Uploads
+  * 240 file upload requests per minute, per user
+* Search
+  * 6 searches per second, per user, to the <Link href="/reference/get-search">search endpoint</Link>
+  * Two additional limits are applied on top of the basic rate limit
+    * 60 searches per minute, per user
+    * 12 searches per second, per enterprise
+* Box Sign
+  * Create and resend sign request: 100 requests per minute, per user
+  * Get sign request: 1000 requests per minute, per user
+
+## Rate limit error
+
+When an application hits a rate limit, the API will return an API response with
+a HTTP status code of `429 Too Many Requests`.
+
+The response will include the following headers and JSON body.
+
+```yaml  theme={null}
+retry-after: 100
+```
+
+```json  theme={null}
+{
+  "type": "error",
+  "status": 429,
+  "code": "rate_limit_exceeded",
+  "help_url": "https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/",
+  "message": "Request rate limit exceeded, please try again later",
+  "request_id": "abcdef123456"
+}
+```
+
+Please see the <Link href="/reference/resources/client-error">Client Error resource</Link> for more details.
+
+<Note>
+  The `retry-after` header provides guidance on the number of seconds to wait
+  before the next API call can be retried. In general, we advise using an
+  exponential back-off strategy for retrying API calls.
+</Note>
+
+[pricing]: https://www.box.com/pricing
+
+<RelatedLinks
+  title="RELATED APIS"
+  items={[
+  { label: translate("Search for content"), href: "/reference/get-search", badge: "GET" }
+]}
+/>
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Errors"), href: "/guides/api-calls/permissions-and-errors/common-errors", badge: "GUIDE" }
+]}
+/>

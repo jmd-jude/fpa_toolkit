@@ -1,0 +1,861 @@
+# Box API — Content Picker UI Element
+# Generated: 2026-04-06T20:12:10Z
+# Sources:
+  https://developer.box.com/guides/embed/ui-elements/picker.md
+  https://developer.box.com/guides/embed/ui-elements/index.md
+  https://developer.box.com/guides/embed/ui-elements/installation.md
+  https://developer.box.com/guides/security/cors.md
+# ==========================================================================
+
+## Content Picker
+## Source: https://developer.box.com/guides/embed/ui-elements/picker.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Content Picker
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+<RelatedLinks
+  title="REQUIRED GUIDES"
+  items={[
+  { label: translate("Installation"), href: "/guides/embed/ui-elements/installation", badge: "GUIDE" }
+]}
+/>
+
+The Box Content Picker UI Element allows developers to add support for selecting
+files and folders from Box in their desktop or mobile web application. The
+library fetches information about a specified folder through the Box API and
+renders the content in a folder view. Users can select files or folders and this
+content information is then passed to another part of the application.
+
+## Installation
+
+<Link href="/guides/embed/ui-elements/installation">Learn how to install</Link> Box UI elements
+either through NPM or the Box CDN.
+
+## Authentication
+
+The UI Elements are designed in an authentication agnostic way so whether
+you are using UI Elements for users who have Box accounts (Managed Users) or
+non-Box accounts (App Users), UI Elements should work out of the box. The
+reason for this is that UI Elements only expect a "token" to be passed in for
+authentication, and Box provides two different ways to generate tokens - OAuth
+and JWT.
+
+<Card href="/guides/authentication/select" arrow title="Learn about selecting an authentication method" />
+
+## Sample HTML
+
+```html  theme={null}
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Box File Selection</title>
+
+    <!-- Latest version of the picker css for your locale -->
+    <link
+      rel="stylesheet"
+      href="https://cdn01.boxcdn.net/platform/elements/{VERSION}/en-US/picker.css"
+    />
+  </head>
+  <body>
+    <div class="container" style="height:600px"></div>
+    <!-- Latest version of the picker js for your locale -->
+    <script src="https://cdn01.boxcdn.net/platform/elements/{VERSION}/en-US/picker.js"></script>
+    <script>
+      var folderId = "123";
+      var accessToken = "abc";
+      var filePicker = new Box.FilePicker();
+      filePicker.show(folderId, accessToken, {
+        container: ".container"
+      });
+    </script>
+  </body>
+</html>
+```
+
+## Demo
+
+### File Selection Demo
+
+<iframe height="560" scrolling="no" title="Box File Picker" src="//codepen.io/box-platform/embed/PWPxBm/?height=560&theme-id=27216&default-tab=result&embed-version=2&editable=true" frameborder="no" allowtransparency="true" allowfullscreen="true" style={{width: "100%"}} />
+
+### Folder Selection Demo
+
+<iframe height="560" scrolling="no" title="Box Folder Picker" src="//codepen.io/box-platform/embed/WRQLey/?height=560&theme-id=27216&default-tab=result&embed-version=2&editable=true" frameborder="no" allowtransparency="true" allowfullscreen="true" style={{width: "100%"}} />
+
+### File Selection + Preview Demo
+
+<iframe height="560" scrolling="no" title="Box File Picker + Box Preview" src="//codepen.io/box-platform/embed/oBjJgL/?height=560&theme-id=27216&default-tab=result&embed-version=2&editable=true" frameborder="no" allowtransparency="true" allowfullscreen="true" style={{width: "100%"}} />
+
+### File Selection as a popup
+
+<iframe height="560" scrolling="no" title="Box File Picker and Uploader as popups" src="//codepen.io/box-platform/embed/oWEKdq/?height=560&theme-id=27216&default-tab=result&embed-version=2&editable=true" frameborder="no" allowtransparency="true" allowfullscreen="true" style={{width: "100%"}} />
+
+<Info>
+  **Access Token**
+
+  These demos may not fully function until you provide a valid access token. For
+  testing purposes, you can use your temporary developer token. This will need
+  to be updated under the JS tab in the demo.
+</Info>
+
+## API
+
+```js  theme={null}
+const { FilePicker } = Box;
+const filePicker = new FilePicker();
+
+/**
+ * Shows the file selection.
+ *
+ * @public
+ * @param {String} folderId - The root folder id.
+ * @param {String} accessToken - The API access token.
+ * @param {Object|void} [options] - Optional options.
+ * @return {void}
+ */
+filePicker.show(folderId, accessToken, options);
+
+/**
+ * Hides the file picker, removes all event listeners, and clears out the HTML.
+ *
+ * @public
+ * @return {void}
+ */
+filePicker.hide();
+
+/**
+ * Clears out the internal in-memory cache for the file picker. This forces
+ * items to be reloaded from the API.
+ *
+ * @public
+ * @return {void}
+ */
+filePicker.clearCache();
+
+/**
+ * Adds an event listener to the file picker. Listeners should be added before
+ * calling show() so no events are missed.
+ *
+ * @public
+ * @param {String} eventName - Name of the event.
+ * @param {Function} listener - Callback function.
+ * @return {void}
+ */
+filePicker.addListener(eventName, listener);
+
+/**
+ * Removes an event listener from the file picker.
+ *
+ * @public
+ * @param {String} eventName - Name of the event.
+ * @param {Function} listener - Callback function.
+ * @return {void}
+ */
+filePicker.removeListener(eventName, listener);
+
+/**
+ * Removes all event listeners from the file picker.
+ *
+ * @public
+ * @return {void}
+ */
+filePicker.removeAllListeners();
+```
+
+### Parameters
+
+| Parameter     | Type   | Description                                                                                                                                                                      |
+| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `folderId`    | String | Box Folder ID. This will be the ID of the folder from which you want the content to be picked. If you want to use the Box All Files folder, then use `0` as the `folderId`.      |
+| `accessToken` | String | Box API access token to use. This should have read/write access to the folder above. The value passed in for the token is assumed to never expire while the explorer is visible. |
+| `options`     | Object | Optional options. See below for details. For example: `contentExplorer.show(FOLDER_ID, TOKEN, {canDelete: false})` would be used to hide the delete option.                      |
+
+### Options
+
+| Parameter             | Type            | Default                                                    | Description                                                                                                                                                                                                                                                                                                                    |   |
+| --------------------- | --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | - |
+| `container`           | `String`        | `document.body`                                            | CSS selector of the container in which the content picker should be placed. Calling hide() will clear out this container.                                                                                                                                                                                                      |   |
+| `sortBy`              | `String`        | `name`                                                     | The initial sort by option for the content list. Value should be either name or `date`.                                                                                                                                                                                                                                        |   |
+| `sortDirection`       | `String`        | `ASC`                                                      | The initial sort direction option for the content list. Value should be either `ASC` or `DESC`.                                                                                                                                                                                                                                |   |
+| `logoUrl`             | `String`        |                                                            | URL of custom logo to show in header. If this value is the string box then the box logo will show.                                                                                                                                                                                                                             |   |
+| `extensions`          | `Array<string>` | `[]`                                                       | Array of file extensions to be allowed for selection. for example `['doc', 'ppt']`. Applicable only to the File Picker and not the Folder Picker. If any extensions are provided, only those will have the ability to be selected. An empty array signifies all the file extensions are allowed for selection.                 |   |
+| `maxSelectable`       | `Number`        | `Infinity`                                                 | Number of files or folders that can be selected. Specify 1 if you want only 1 file or folder selected.                                                                                                                                                                                                                         |   |
+| `canUpload`           | `Boolean`       | `true`                                                     | Visually hides the upload option if this is set to `false`. Hiding the option alone will not prevent uploading unless the current folder permissions also set `can_upload` to `false`. This option has no effect when the folder permission `can_upload` is set to `false`.                                                    |   |
+| `canSetShareAccess`   | `Boolean`       | `true`                                                     | Visually hides the sharing drop down select if set to `false`. Hiding the select drop down alone will not prevent changing the share access unless the folder item permissions also set `can_set_share_access` to `false`. This option has no effect when the folder item permission `can_set_share_access` is set to `false`. |   |
+| `canCreateNewFolder`  | `Boolean`       | `true`                                                     | Visually hides the create new folder option. Hiding the option alone will not prevent creating a new folder unless the folder item permissions also set `can_upload` to `false`. This option has no effect when the folder item permission `can_upload` is set to false.                                                       |   |
+| `sharedLink`          | `String`        |                                                            | Shared link URL, required if folder is shared and the access token doesn't belong to an owner or collaborator of the file.                                                                                                                                                                                                     |   |
+| `sharedLinkPassword`  | `String`        |                                                            | Shared link password, required if shared link has a password.                                                                                                                                                                                                                                                                  |   |
+| `modal`               | `Object`        |                                                            | When the modal attribute is specified, then the content pickers will not be created in-place. Instead a button will be created in the container and clicking this button will launch the content picker in a modal popup.                                                                                                      |   |
+| `size`                | `String`        | `undefined`                                                | Indicates to the content picker to fit within a `small` or `large` width container. Value can be absent or one of `small` or `large`. If absent the UI Element will adapt to its container and automatically switch between small width or large width mode.                                                                   |   |
+| `isTouch`             | Boolean         | Defaults to the browser and device's default touch support | Indicates to the content explorer that it's is being rendered on a touch enabled device.                                                                                                                                                                                                                                       |   |
+| `autoFocus`           | `Boolean`       | `false`                                                    | When set to `true`, the item grid will get focus on initial load.                                                                                                                                                                                                                                                              |   |
+| `defaultView`         | String          | `files`                                                    | Value should either be `files` or `recents`. When set to `recents`, by default you will see recent items instead of the regular file/folder structure.                                                                                                                                                                         |   |
+| `chooseButtonLabel`   | `String`        |                                                            | String to re-label the Choose button                                                                                                                                                                                                                                                                                           |   |
+| `cancelButtonLabel`   | `String`        |                                                            | String to re-label the Cancel button                                                                                                                                                                                                                                                                                           |   |
+| `requestInterceptor`  | `Function`      |                                                            | Function to intercept requests. For an example see <Link href="https://codepen.io/box-platform/pen/jLdxEv">this CodePen</Link>. Our underlying XHR library is `axios.js` and we follow a <Link href="https://github.com/axios/axios#interceptors">similar approach for interceptors</Link>.                                    |   |
+| `responseInterceptor` | `Function`      |                                                            | Function to intercept responses. For an example see <Link href="https://codepen.io/box-platform/pen/jLdxEv">this CodePen</Link>. Our underlying XHR library is `axios.js` and we follow a <Link href="https://github.com/axios/axios#interceptors">similar approach for interceptors</Link>.                                   |   |
+
+### Modal Options
+
+| Parameter          | Type     | Default         | Description                                   |
+| ------------------ | -------- | --------------- | --------------------------------------------- |
+| `buttonLabel`      | `String` |                 | Label for the button                          |
+| `buttonClassName`  | `String` | Box Blue Button | CSS class to decorate the button              |
+| `modalClassName`   | `String` |                 | CSS class to decorate the modal popup content |
+| `overlayClassName` | `String` |                 | CSS class to decorate the modal popup overlay |
+
+### Events
+
+| Event Name | Event Data                          | Description                                                                                                                                                                                         |
+| ---------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `choose`   | `Array<File \| Web Link \| Folder>` | Will be fired when the Choose button is pressed. Event data will be an array of Folder Object or File Object or Web Link object depending upon whether it was a file selection or folder selection. |
+| `cancel`   |                                     | Will be fired when the Cancel button is pressed                                                                                                                                                     |
+
+## Keyboard Shortcuts
+
+When the item grid has focus, either manually by clicking on it or
+programmatically via javascript or via the above mentioned `autoFocus` prop, the
+following keyboard shortcuts will work if their corresponding operations are
+applicable and allowed.
+
+| Key                     | Action                             |
+| ----------------------- | ---------------------------------- |
+| `Arrow Up`              | Previous item row                  |
+| `Arrow Down`            | Next item row                      |
+| `Ctrl/Cmd + Arrow Up`   | First item row                     |
+| `Ctrl/Cmd + Arrow Down` | Last item row                      |
+| `/`                     | Search                             |
+| `Shift + X`             | Select an item row                 |
+| `Enter`                 | Open the selected item             |
+| `g then f`              | Navigates to the root folder       |
+| `g then u`              | Upload to the current folder       |
+| `g then b`              | Focuses the root folder breadcrumb |
+| `g then s`              | Shows the selected items           |
+| `g then x`              | Cancel                             |
+| `g then c`              | Choose                             |
+| `g then r`              | Recent items                       |
+
+## Scopes
+
+If your application requires the end user to only be able to access a subset of
+the Content Picker functionality, you can use <Link href="/guides/authentication/tokens/downscope">Downscoping</Link> to
+appropriately downscope the Access Token to a resulting token that has the
+desired set of permissions, and can thus, be securely passed to the end user
+client initializing the Content Picker.
+
+Below are a set of UI Element-specific scopes to go alongside Downscoping. These
+allow developers to enable/disable UI controls on the Content Picker by
+configuring the appropriate scopes on the downscoped token. To learn
+more, see <Link href="/guides/api-calls/permissions-and-errors/scopes">Dedicated Scopes for Box UI Elements</Link>.
+
+| Scope Name    | Permissions granted                                                              |
+| ------------- | -------------------------------------------------------------------------------- |
+| `base_picker` | Allows access to content in the folder tree based on user/file/token permissions |
+
+### Feature Scopes
+
+| Scope Name    | Permissions granted                                                                  |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `item_share`  | Allows sharing of resource specified under "resource" of the Token Exchange request. |
+| `item_upload` | Allows upload in the content picker                                                  |
+
+### Sample Scenarios
+
+| Scenario                                                                                                                                         | Scopes                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| User wants to only navigate a folder structure and pick a file / folder                                                                          | `base_picker`                                |
+| User wants to navigate a folder structure, pick a file / folder and also set access level                                                        | `base_picker` + `item_share`                 |
+| User wants to navigate a folder structure, pick a file / folder and also upload a file / folder                                                  | `base_picker` + `item_upload`                |
+| User should be able to navigate a folder structure and pick a file / folder, upload a file / folder, and also set access level for a file/folder | `base_picker` + `item_share` + `item_upload` |
+
+## Custom actions
+
+You can expand the actions in the **More Options** menu for files and folders in Content Explorer and Content Picker. Your custom options show when user clicks the ellipsis button.
+
+To customize the **More Options** menu, pass an array of custom actions to `itemActions`.
+
+```js  theme={null}
+contentExplorer.show(configData.FOLDER_ID, configData.ACCESS_TOKEN, {
+    container: ".container",
+    itemActions: customActions,
+});
+```
+
+The array can include multiple actions. The action object should include the `label`, and the `onAction` callback function. You can filter the custom actions to appear only on a specific item `type`, by passing the `file` or `folder` value. The `filter` value is used for advanced filtering, for example by a specific file extension:
+
+```js  theme={null}
+const customActions = [
+    {
+        label: "Preview in New Window",
+        onAction: (item) => alert('action ' + item),
+        type: 'file',
+    },
+    {
+        label: "Open in Box.com",
+        onAction: (item) => window.open("https://app.box.com"),
+    },
+    {
+        label: "Export",
+        onAction: (item) => console.log('action ' + item),
+        filter: (item) => item.extension?.toLowerCase() === 'pdf',
+    },
+];
+```
+
+See the implemented examples in CodePen:
+
+<iframe height="560" scrolling="no" title="Box custom icons" src="https://codepen.io/box-platform/embed/EaaMMKQ?default-tab=html%2Cresult" frameborder="no" allowtransparency="true" allowfullscreen="true" style={{width: "100%"}} />
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("UI Elements"), href: "/guides/embed/ui-elements/index", badge: "GUIDE" }
+]}
+/>
+
+
+## UI Elements overview
+## Source: https://developer.box.com/guides/embed/ui-elements/index.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# UI Elements
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+Box UI Elements are pre-built UI components that allow developers to add
+elements of the main Box web application into their own applications. They can
+be used to navigate through, upload, preview, and select content stored on Box
+and are available both as React components and framework-agnostic JavaScript
+libraries.
+
+## Available Elements
+
+Box offers several UI Elements to create common user experiences with files and
+folders in an application.
+
+The available UI Elements are:
+
+* <Link href="/guides/embed/ui-elements/explorer">Content Explorer</Link>- Allow users to search and browse through files and folders. It also has a metadata query based view <Link href="/guides/embed/ui-elements/explorer-metadata-v2">variant</Link> that supports items sorting, filtering, custom columns, and more.
+* <Link href="/guides/embed/ui-elements/open-with">Content Open With</Link> - Allow users to open content stored in box with a partner application using an embedded dropdown.
+
+<Warning>
+  We no longer support the `OpenWith` UI element for any new customers as of December 21, 2021.
+</Warning>
+
+* <Link href="/guides/embed/ui-elements/picker">Content Picker</Link> - Allow users to select files or folders from their Box account.
+* <Link href="/guides/embed/ui-elements/preview">Content Preview</Link> - Display interactive viewers for documents, images, audio, video, and more.
+* <Link href="/guides/embed/ui-elements/sidebar">Content Sidebar</Link> - Display a sidebar for file metadata and activity feed information.
+* <Link href="/guides/embed/ui-elements/uploader">Content Uploader</Link> - Allow users to upload files by selecting or using drag-and-drop.
+
+UI Elements can be used in isolation or joined together to construct common user
+flows with content, such as uploading and then viewing a file.
+
+
+## UI Elements installation
+## Source: https://developer.box.com/guides/embed/ui-elements/installation.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Installation
+
+export const Link = ({href, children, className, ...props}) => {
+  const localizedHref = href;
+  return <a href={localizedHref} className={className} {...props}>
+      {children}
+    </a>;
+};
+
+export const MultiRelatedLinks = ({sections = []}) => {
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+  return <div className="space-y-8">
+      {sections.map((section, index) => <RelatedLinks key={index} title={section.title} items={section.items} />)}
+    </div>;
+};
+
+export const RelatedLinks = ({title, items = []}) => {
+  const getBadgeClass = badge => {
+    if (!badge) return "badge-default";
+    const badgeType = badge.toLowerCase().replace(/\s+/g, "-");
+    return `badge-${badge === "ガイド" ? "guide" : badgeType}`;
+  };
+  if (!items || items.length === 0) {
+    return null;
+  }
+  return <div className="my-8">
+      {}
+      <h3 className="text-sm font-bold uppercase tracking-wider mb-4">{title}</h3>
+
+      {}
+      <div className="flex flex-col gap-3">
+        {items.map((item, index) => <a key={index} href={item.href} className="py-2 px-3 rounded related_link hover:bg-[#f2f2f2] dark:hover:bg-[#111827] flex items-center gap-3 group no-underline hover:no-underline border-b-0">
+            {}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${getBadgeClass(item.badge)}`}>
+              {item.badge}
+            </span>
+
+            {}
+            <span className="text-base">{item.label}</span>
+          </a>)}
+      </div>
+    </div>;
+};
+
+UI Elements can be used either by downloading the Javascript libraries
+directly from the Box CDN or by installing our [NPM package][npm]. All UI
+Elements require their corresponding CSS stylesheet to render properly.
+
+## Prerequisites
+
+To use Box UI Elements, you need the following Node and React versions:
+
+* Node version: `>=18.18.2 <22.11.0`
+* React version `>=18.0.0 <=19.0.0`
+
+The available versions of UI elements are listed in the [manual installation][manual-installation] section.
+
+### Migration to React 19
+
+For existing projects based on React 18 or below, check the [React 19 migration guide][react-migration].
+
+<Warning>
+  Update `react-tether` in your `package.json` to `>= v3.0.3` to avoid compatibility issues.
+</Warning>
+
+Once you upgrade React in your project, update the `box-ui-elements` package with `npm` or `yarn`:
+
+```shell  theme={null}
+npm install box-ui-elements --legacy-peer-deps
+
+yarn add box-ui-elements
+```
+
+This should result in updated version in the `package.json` file:
+
+```json  theme={null}
+"box-ui-elements": "^26.0.0"
+```
+
+No additional changes related to Box UI elements are required in your code.
+
+For more information, check the blog post about React 19 upgrade for UI elements.
+
+## NPM installation
+
+Use this when you are building a React based app and would like to import the
+components directly into your app at build time.
+
+> **Note** The `--legacy-peer-deps` flag is necessary when installing UI elements with `npm` due to library dependencies.
+
+```sh  theme={null}
+npm install box-ui-elements --legacy-peer-deps
+yarn add box-ui-elements
+```
+
+<Card href="https://www.npmjs.com/package/box-ui-elements" arrow title="Learn more on the NPM website" />
+
+<Warning>
+  ## Content Preview
+
+  Use the Content Preview SDK if you need a specific
+  version of the preview library. Otherwise,
+  use Content Preview UI Element wrapper.
+</Warning>
+
+## Manual installation
+
+All the UI elements are also available directly from the Box CDN.
+
+| Element                                                                                   | Version  | File                                                                                                                                                                                             |
+| ----------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <Link href="/guides/embed/ui-elements/explorer">Content Explorer</Link>                   | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.css`</Link>                              |
+|                                                                                           |          | JS with React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.js`</Link>                      |
+|                                                                                           |          | JS without React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.no.react.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/explorer.no.react.js`</Link> |
+| <Link href="/guides/embed/ui-elements/open-with">Content Open With</Link>                 | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.css`</Link>                              |
+|                                                                                           |          | JS with React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.js`</Link>                      |
+|                                                                                           |          | JS without React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.no.react.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/openwith.no.react.js`</Link> |
+| <Link href="/guides/embed/ui-elements/picker">Content Picker</Link>                       | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.css`</Link>                                  |
+|                                                                                           |          | JS with React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.js`</Link>                          |
+|                                                                                           |          | JS without React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.no.react.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/picker.no.react.js`</Link>     |
+| <Link href="/guides/embed/ui-elements/sidebar">Content Sidebar</Link>                     | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.css`</Link>                                |
+|                                                                                           |          | JS with React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.js`</Link>                        |
+|                                                                                           |          | JS without React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.no.react.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/sidebar.no.react.js`</Link>   |
+| <Link href="/guides/embed/ui-elements/uploader">Content Uploader</Link>                   | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.css`</Link>                              |
+|                                                                                           |          | JS with React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.js`</Link>                      |
+|                                                                                           |          | JS without React <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.no.react.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/uploader.no.react.js`</Link> |
+| <Link href="https://github.com/box/box-content-preview">Content Preview UI Element</Link> | `26.0.0` | CSS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/preview.css">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/preview.css`</Link>                                |
+|                                                                                           | `26.0.0` | JS <Link href="https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/preview.js">`https://cdn01.boxcdn.net/platform/elements/26.0.0/en-US/preview.js`</Link>                                   |
+| <Link href="/guides/embed/ui-elements/preview">Content Preview SDK</Link>                 | `3.0.0`  | CSS <Link href="https://cdn01.boxcdn.net/platform/preview/3.0.0/en-US/preview.css">`https://cdn01.boxcdn.net/platform/preview/3.0.0/en-US/preview.css`</Link>                                    |
+|                                                                                           |          | JS <Link href="https://cdn01.boxcdn.net/platform/preview/3.0.0/en-US/preview.js">`https://cdn01.boxcdn.net/platform/preview/3.0.0/en-US/preview.js`</Link>                                       |
+
+Use these links to either download the elements code to your application's
+code, or embed them straight into your page from the CDN.
+
+```html  theme={null}
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <!-- Latest version of the explorer css for your locale -->
+    <link
+      rel="stylesheet"
+      href="https://cdn01.boxcdn.net/platform/elements/{VERSION}/en-US/explorer.css"
+    />
+  </head>
+  <body>
+    <!-- Latest version of the explorer js for your locale -->
+    <script src="https://cdn01.boxcdn.net/platform/elements/{VERSION}/en-US/explorer.js"></script>
+    ...
+  </body>
+</html>
+```
+
+For Box Preview, the sample would look slightly different.
+
+```html  theme={null}
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Box Content Preview Demo</title>
+
+    <!-- Latest version of Box Content Preview for en-US locale -->
+    <script src="https://cdn01.boxcdn.net/platform/preview/{VERSION}/en-US/preview.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn01.boxcdn.net/platform/preview/{VERSION}/en-US/preview.css"
+    />
+  </head>
+  <body>
+    <div class="preview-container" style="height:400px; width:100%;"></div>
+    <script>
+      var preview = new Box.Preview();
+      preview.show("93392244621", "EqFyi1Yq1tD9mxY8F38sxDfp73pFd7FP", {
+        container: ".preview-container",
+        showDownload: true,
+      });
+    </script>
+  </body>
+</html>
+```
+
+### Versions
+
+Most of the UI elements have 2 distinct versions.
+
+* A standard `*.js` file (e.g. `explore.js`) that includes React and ReactDOM in the bundle.
+  * Use this when you are not building a React based app or you don't want to include the components as part of your app's build process.
+  * It includes React and ReactDOM libraries.
+  * The file size of this asset will be larger than the one below.
+* A smaller `*.no.react.js` file (e.g. `explore.no.react.js`) that does not get bundled with React and ReactDOM.
+  * Use this when both React and ReactDOM libraries are already loaded on the application.
+  * These libraries expect a React and ReactDOM `>= 16.6` and `< 18`.
+
+<message>
+  Only one of the two `js` files and the additional `css` file need to be added
+  to a project.
+</message>
+
+### Supported Locales
+
+The above asset URLs use `en-US`. If you want to use another locale, then
+replace `en-US` in the URLs above with any of the following:
+
+`en-AU`, `en-CA`, `en-GB`, `da-DK`, `de-DE`, `es-ES`, `fi-FI`, `fr-CA`, `fr-FR`,
+`it-IT`, `ja-JP,`, `ko-KR`, `nb-NO`, `nl-NL`, `pl-PL`, `pt-BR`, `ru-RU`,
+`sv-SE`, `tr-TR`, `zh-CN`, `zh-TW`
+
+## Self-hosting Content Preview
+
+To serve the Box Content Preview library from your own server, follow these
+steps.
+
+### 1. Download release
+
+Either fork the repository and check out the version you want to serve or
+download the specific version as a zip.
+
+* Check out a specific version with `git checkout v3.0.0`.
+* Download a specific version as a zip from the [releases][preview-releases] page.
+
+### 2. Install dependencies
+
+Install the dependencies and build the library with the following command.
+
+```sh  theme={null}
+yarn install && yarn build:i18n && yarn build:prod
+```
+
+### 3. Serve files
+
+Self-serve everything except for the `dev` folder from the `/dist` folder. You
+must not alter the folder structure and `third-party` needs to be in the same
+folder as `3.0.0`.
+
+For example, if you self-host using a `box-assets` directory, these URLs must
+be accessible:
+
+* `https://cdn.YOUR_SITE.com/box-assets/3.0.0/en-US/preview.js`
+* `https://cdn.YOUR_SITE.com/box-assets/third-party/text/2.65.0/papaparse.min.js`
+* `https://cdn.YOUR_SITE.com/box-assets/third-party/model3d/1.12.0/three.min.js`
+
+## Authentication
+
+In order to initialize any of the UI Elements, an application will need to
+provide a valid Access Token.
+
+<Card href="/guides/authentication/select" arrow title="Learn how to authenticate an application" />
+
+It is also recommended to <Link href="/guides/authentication/tokens/downscope">downscope</Link> an Access Token before passing
+it into an insecure environment (the user's web browser).
+
+UI Elements only expect any Access Token to be passed in for authentication, and
+can therefore be used for any type of authentication available from Box
+Platform.
+
+For testing purposes, a <Link href="/guides/authentication/tokens/developer-tokens">Developer Token</Link> can be used.
+
+## CORS
+
+To use UI Elements, an application needs to allow the domain the widget is
+used on for Cross Origin Resource sharing. See the <Link href="/guides/security/cors">CORS guide</Link> for more
+details.
+
+## Source Code & Releases
+
+Source code for Box UI Elements is [hosted on GitHub][gh]. The repository
+contains detailed documentation for usage and development. Please file any bugs
+you encounter under the "Issues" tab with clear steps to reproduce. This
+repository also holds a list of [releases][releases].
+
+[npm]: https://www.npmjs.com/package/box-ui-elements
+
+[gh]: https://github.com/box/box-ui-elements
+
+[releases]: https://github.com/box/box-ui-elements/releases
+
+[scopes]: /guides/api-calls/permissions-and-errors/scopes
+
+[preview-releases]: https://github.com/box/box-content-preview/releases
+
+[manual-installation]: #manual-installation
+
+[react-migration]: https://react.dev/blog/2024/04/25/react-19-upgrade-guide
+
+<RelatedLinks
+  title="RELATED GUIDES"
+  items={[
+  { label: translate("Select Auth Method"), href: "/guides/authentication/select", badge: "GUIDE" },
+  { label: translate("Cross-Origin Resource Sharing (CORS)"), href: "/guides/security/cors", badge: "GUIDE" }
+]}
+/>
+
+
+## Cross-Origin Resource Sharing (CORS)
+## Source: https://developer.box.com/guides/security/cors.md
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://developer.box.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Cross-Origin Resource Sharing (CORS)
+
+[Cross-Origin Resource Sharing (CORS)][mdn_cors] is a security mechanism used
+by web browsers to prevent malicious websites from accessing data on other
+sites (like the Box API) without explicit permission.
+
+<Warning>
+  CORS only applies to Box API requests made by a web page using a
+  web browser, and it relies on the `HTTP Origin` header being passed along
+  by the browser. It does not come in to play in a server-side environment.
+</Warning>
+
+<Card href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" title="Visit the MDN Web Docs for more generic information about CORS." />
+
+## How CORS works
+
+When a browser on one domain (for example `company.com`) tries to fetch
+images, files, or even API resources from another domain (`box.com`),
+the web browser will prevent access to any of those assets unless the right
+CORS headers are present.
+
+When the browser makes a cross-origin request, an `Origin` request header is
+passed along with it that contains the domain of the site making that
+request. This header can not be changed and is part of your web browser's
+essential security.
+
+By default, a browser will not accept any asset loaded from another domain
+if there is no `Access-Control-Allow-Origin` response header present.
+Servers like Box can explicitly list the domains allowed to access resources
+on this server, or they can return a `*` value to allow any domain to access
+the API.
+
+## How Box uses CORS
+
+Box uses the `Origin` request header and `Access-Control-Allow-Origin`
+response header to enforce CORS rules defined by the developer.
+
+### `Origin`-header validation
+
+The Box API validates the `Origin` request header against the list of allowed
+domains set by the application developer. Multiple allowed origins can be set
+and any origin not on the list will return in a `HTTP 403` error.
+
+```json  theme={null}
+{
+  "type": "error",
+  "status": 403,
+  "code": "cors_origin_not_whitelisted",
+  "context_info": {
+    "origin": "https://company.com"
+  },
+  "help_url": "https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/",
+  "message": "Access denied - Did you forget to safelist your origin in the CORS config of your app?",
+  "request_id": "4dsdfsa832213"
+}
+```
+
+If no origin is set, all requests to the Box API for this application return
+an error.
+
+### `Access-Control-Allow-Origin` response header
+
+After the Box API has validated the `Origin` header, it will return the data
+requested as well as a `Access-Control-Allow-Origin` response header with
+the value `*`.
+
+```yaml  theme={null}
+HTTP/1.1 200 OK
+Date: Wed, 23 Sep 2020 14:07:29 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+Strict-Transport-Security: max-age=31536000
+Cache-Control: no-cache, no-store
+Access-Control-Allow-Origin: *
+Vary: Origin
+BOX-REQUEST-ID: 032cfb446dae4fd0b4c2bff80a1a97ba7
+```
+
+By returning this header, the Box API informs the web browser that the
+response can be used in the site that requested the data.
+
+## Enabling CORS for your domain
+
+To enable CORS for the domain your application runs on, head over to the
+developer console, select your application, and scroll down to the bottom of the
+**Configuration** panel to find the **CORS Domains** setting.
+
+Add a comma separated list of all the origins that you expect your application
+to be making Box API requests from. Domains require the schema (`http` or
+`https`) and can include wildcards for subdomains, for example `*.example.com`.
+
+If your site runs on a non-standard port, it will also need to include that.
+This is especially relevant for a site running on `localhost` or `127.0.0.1`.
+
+An example list of origins would be as follows.
+
+```sh  theme={null}
+https://company.com,https://*.internal.company.com,http://localhost:3000
+```
+
+## Debugging CORS
+
+There are a few different kind of CORS errors that might occur when making
+API calls to the Box API.
+
+### `HTTP 403` - No allowed origins defined
+
+You might get this error even after you provided a list of origins. Often,
+this is because of a typo in the provided origins.
+
+1. **Check your origins** - Head back to the developer console and make sure your origins map the site your are making the API call from. Keep in mind that an origin includes the scheme (`http(s)`) but no path or trailing `/`. We recommend inspecting the page using your browser's debug console and checking the `Origin` request header value. This value should match one of the provided values in the developer console.
+2. **Check your credentials** - Another reason for this error might be that you are authenticating as a different application than the one you have set the origin up for. Check that the credentials match the ones of the application you are intending to use. We recommend trying to make a call from a server-side script to validate that the API call works.
+
+### `Cross-Origin Request Blocked`
+
+In some cases, you might get a Javascript error that mentions CORS.
+
+```sh  theme={null}
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading
+the remote resource at https://api.box.com/2.0/users/me. (Reason: CORS
+request did not succeed).
+```
+
+In many cases this has little to do with CORS. Instead we recommend checking the
+following.
+
+1. **Check your authentication headers** - If the authorization header is not provided or malformed, then the API will return a generic error without the necessary `Access-Control-Allow-Origin` header. This in turn will cause the previously mentioned error to be raised by your browser. Make sure to pass in an access token using the `Authorization: Bearer ...` header.
+2. **Check for requests blocked by VPN, Proxies, etc** - In some cases, the Box API might be blocked by your VPN, corporate proxy, a browser extension, your DNS provider, or any other service that can intercept network traffic. Any of these can intercept the request and return a whole new request that does not include the necessary `Access-Control-Allow-Origin` header. To test for this case, try to make the same API call from a non-browser environment, from an incognito window, or from a whole other (not company owned) device.
+
+[mdn_cors]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+
+### `Access-Control-Allow-Origin` header issues
+
+If you encounter issues with the `Access-Control-Allow-Origin` header, do the following:
+
+1. **Check if your domain is on the list of allowed origins** - Go to the developer console and open your application. Click on the **Configuration** tab and scroll down. You can add your domain to the list in section **CORS domains**.
+
+<Frame border shadow center>
+    <img src="https://mintcdn.com/box/_tECS-SYBYV9K-kZ/images/guides/security/cors_allowed_origins.png?fit=max&auto=format&n=_tECS-SYBYV9K-kZ&q=85&s=6348e24d2d1187b50c2a75da5f9ae8fb" alt="CORS allowlist" width="736" height="185" data-path="images/guides/security/cors_allowed_origins.png" />
+</Frame>
+
+2. **Check if your server is set up correctly** - Configure your server to handle cross-domain requests or use non-cross-domain requests if you receive a warning **No 'access-control-allow-origin' header is present on the requested resource**.
