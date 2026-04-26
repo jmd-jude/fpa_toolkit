@@ -85,43 +85,52 @@ In the Box developer console, your Custom App must have:
 
 1. Push the repo to GitHub
 2. Create a new project on Railway and deploy from the GitHub repo
-3. Set environment variables in Railway's dashboard (`BOX_CLIENT_ID`, `BOX_CLIENT_SECRET`, `BOX_REDIRECT_URI`, `SESSION_SECRET`)
-4. Update `BOX_REDIRECT_URI` to your Railway app URL (e.g. `https://your-app.railway.app/api/auth/callback`)
-5. Add the Railway URL to your Box app's registered redirect URIs and CORS Domains
+3. Provision a Railway Postgres database and attach it to the project — Railway sets `DATABASE_URL` automatically
+4. Set environment variables in Railway's dashboard (`BOX_CLIENT_ID`, `BOX_CLIENT_SECRET`, `BOX_REDIRECT_URI`, `SESSION_SECRET`)
+5. Update `BOX_REDIRECT_URI` to your Railway app URL (e.g. `https://your-app.railway.app/api/auth/callback`)
+6. Add the Railway URL to your Box app's registered redirect URIs and CORS Domains
 
-No additional deployment configuration is needed for the deposition pipeline — new Python scripts are automatically included.
+The `kanban_cards` and `usage_events` tables are created automatically on first API call — no manual migration needed.
 
 ## Project structure
 
 ```
 python/
-  manifest.py        # Box folder traversal and metadata extraction
-  enrich.py          # AI enrichment — document date and description via Box AI
-  report.py          # Excel report generation for document index
-  depo_summary.py      # Page-by-page deposition extraction via Box AI; saves transcript PDF to tmpdir
-  depo_report.py       # Excel report generation for deposition summary
+  manifest.py           # Box folder traversal and metadata extraction
+  enrich.py             # AI enrichment — document date and description via Box AI
+  report.py             # Excel report generation for document index
+  depo_summary.py       # Page-by-page deposition extraction via Box AI; saves transcript PDF to tmpdir
+  depo_report.py        # Excel report generation for deposition summary
   depo_pdf_generator.py # Merged PDF — summary table with GoTo links prepended to transcript
-  depo_experiment.py   # Original proof-of-concept script (do not invoke from app)
+  depo_experiment.py    # Original proof-of-concept script (do not invoke from app)
 src/
   app/
     api/
-      auth/          # Box OAuth login + callback
-      generate/      # Document index job orchestration
-      depo/          # Deposition summary job orchestration
-      job/           # Job status polling endpoint
-    page.tsx         # Main UI (auth → pipeline selector → picker → job status)
+      auth/             # Box OAuth login + callback
+      generate/         # Document index job orchestration
+      depo/             # Deposition summary job orchestration
+      job/              # Job status polling endpoint
+      kanban/           # Kanban board state — GET/POST, Postgres-backed, auto-creates table
+    page.tsx            # Main UI (auth → pipeline selector → picker → job status)
   lib/
-    box.ts           # Token refresh, Box API helpers
-    jobs.ts          # In-memory job state (pipeline-aware)
-    session.ts       # iron-session config
+    box.ts              # Token refresh, Box API helpers
+    jobs.ts             # In-memory job state (pipeline-aware)
+    session.ts          # iron-session config
+    usage.ts            # Postgres usage event logging + Discord webhook notify
+docs/
+  kanban.html           # Client-facing interactive kanban board (SortableJS, edit-mode gated by password)
+  index.html            # Project hub
+  hub.css               # Shared stylesheet for all docs pages
 ```
 
 ## Environment variables
 
-| Variable | Purpose |
-|---|---|
-| `BOX_CLIENT_ID` | Box Custom App client ID |
-| `BOX_CLIENT_SECRET` | Box Custom App client secret |
-| `BOX_REDIRECT_URI` | Must match redirect URI registered in Box developer console |
-| `SESSION_SECRET` | 32+ character random string for session cookie encryption |
-| `BOX_AI_MODEL` | Box AI model for both pipelines (default: `google__gemini_2_5_pro`) — optional |
+| Variable | Required | Purpose |
+|---|---|---|
+| `BOX_CLIENT_ID` | Yes | Box Custom App client ID |
+| `BOX_CLIENT_SECRET` | Yes | Box Custom App client secret |
+| `BOX_REDIRECT_URI` | Yes | Must match redirect URI registered in Box developer console |
+| `SESSION_SECRET` | Yes | 32+ character random string for session cookie encryption |
+| `DATABASE_URL` | Yes | Railway Postgres connection string — kanban board + usage logging; tables auto-create |
+| `BOX_AI_MODEL` | No | Box AI model for both pipelines (default: `google__gemini_2_5_pro`) |
+| `DISCORD_WEBHOOK_URL` | No | Webhook for job-complete Discord notifications |

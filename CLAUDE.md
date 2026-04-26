@@ -97,7 +97,7 @@ The `/api/auth/token` endpoint returns only the access token (never the refresh 
 
 ## Environment Variables
 
-Box variables are required. `BOX_AI_MODEL` is optional.
+Box variables are required. `BOX_AI_MODEL` is optional. `DATABASE_URL` is required for kanban board persistence and usage logging (Railway Postgres).
 
 | Variable | Required | Purpose |
 |---|---|---|
@@ -105,7 +105,9 @@ Box variables are required. `BOX_AI_MODEL` is optional.
 | `BOX_CLIENT_SECRET` | Yes | Box Custom App client secret |
 | `BOX_REDIRECT_URI` | Yes | Must match redirect URI registered in Box developer console |
 | `SESSION_SECRET` | Yes | 32+ char random string for iron-session cookie encryption |
+| `DATABASE_URL` | Yes (Postgres) | Connection string for Railway Postgres — used by kanban board and usage logging; both tables auto-create on first call |
 | `BOX_AI_MODEL` | No | Box AI model for both pipelines (default: `google__gemini_2_5_pro`) |
+| `DISCORD_WEBHOOK_URL` | No | Webhook URL for job-complete Discord notifications |
 
 For local dev, `BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback`. The Box Custom App must also have `http://localhost:3000` added to its **CORS Domains** list in the Box developer console, or the Content Picker will show "A network error has occurred."
 
@@ -118,8 +120,10 @@ For local dev, `BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback`. The B
 | `src/lib/jobs.ts` | Job type (includes `pipeline` field), `global.__jobs` Map, `createJob` / `updateJob` / `appendLog` |
 | `src/lib/box.ts` | `getFreshToken`, `getBoxUser`, `uploadToBox` |
 | `src/lib/session.ts` | `SessionData` interface and `iron-session` options |
+| `src/lib/usage.ts` | Postgres usage event logging + Discord webhook notify |
 | `src/app/api/generate/route.ts` | Document index job orchestration — manifest → enrich → report → upload |
 | `src/app/api/depo/route.ts` | Deposition summary job orchestration — depo_summary → depo_report → depo_pdf_generator → upload Excel + PDF to parent folder |
+| `src/app/api/kanban/route.ts` | Kanban board state — `GET` returns all cards, `POST` (password-gated) replaces full card set in a transaction; auto-creates `kanban_cards` table on first call |
 | `python/manifest.py` | Accepts `--token`, `--folder-id`, `--output-dir` |
 | `python/enrich.py` | AI enrichment — calls Box AI `extract_structured` with each PDF's file ID; date field supports ranges |
 | `python/report.py` | Accepts `--input-file`, `--output-file`; uses `AI Date` over filename/Box metadata date when present |
@@ -128,3 +132,6 @@ For local dev, `BOX_REDIRECT_URI=http://localhost:3000/api/auth/callback`. The B
 | `python/depo_pdf_generator.py` | Reads topics CSV + saved transcript PDF; builds styled summary table with exact PyMuPDF font-metric row heights and LINK_GOTO annotations; merges with transcript into `{slug}_Summarized.pdf` |
 | `python/depo_experiment.py` | Original proof-of-concept — do not invoke from app, do not modify |
 | `src/app/globals.css` | Box Content Picker CSS overrides scoped to `#box-picker-container` |
+| `docs/kanban.html` | Client-facing interactive kanban board — fetches/saves state via `/api/kanban`; SortableJS drag-and-drop; edit mode gated by password `fpamedit` stored in localStorage |
+| `docs/index.html` | Project hub landing page |
+| `docs/hub.css` | Shared stylesheet for all docs pages |

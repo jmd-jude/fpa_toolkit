@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPAmed — Project Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="hub.css" />
+  <style>
+    .header-inner,
+    .hero-strip-inner,
+    .main-inner { max-width: 1200px; }
+
+    .hero-meta {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    #edit-toggle {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: rgba(255,255,255,0.35);
+      font-family: inherit;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.55rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #edit-toggle:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.6); }
+    body.edit-mode #edit-toggle { border-color: var(--green); color: var(--green); }
+
+    #save-status {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: transparent;
+      min-width: 55px;
+    }
+    #save-status.saving { color: rgba(255,255,255,0.45); }
+    #save-status.saved  { color: var(--green); }
+    #save-status.error  { color: #c0392b; }
+
+    /* ── Board ── */
+    #board { overflow-x: auto; }
+
+    .board-row {
+      display: grid;
+      grid-template-columns: 145px repeat(4, 1fr);
+      min-width: 720px;
+    }
+
+    .board-header { background: var(--dark); border-radius: 10px 10px 0 0; }
+    .lane-label-header {}
+
+    .header-cell {
+      padding: 0.8rem 1rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      border-left: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .swimlane {
+      border-left:   1px solid var(--border);
+      border-right:  1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .swimlane:last-child { border-radius: 0 0 10px 10px; }
+
+    .lane-label-cell {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      justify-content: flex-start;
+    }
+
+    .lane-name { font-size: 0.85rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+
+    .lane-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .badge-live       { background: var(--green); color: var(--white); }
+    .badge-pre-launch { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--border); }
+
+    .status-cell {
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      padding: 0.85rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 80px;
+    }
+
+    .swimlane-pre-launch .lane-label-cell { opacity: 0.65; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 0.95rem;
+      position: relative;
+    }
+    body.edit-mode .card { cursor: grab; padding-right: 2rem; }
+    body.edit-mode .card:active { cursor: grabbing; }
+
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+
+    .card-body {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-top: 0.35rem;
+    }
+
+    .card-tag {
+      display: inline-block;
+      margin-top: 0.55rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--border);
+    }
+
+    .card-actions {
+      display: none;
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      gap: 0.15rem;
+    }
+    body.edit-mode .card-actions { display: flex; }
+
+    .card-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2rem 0.3rem;
+      line-height: 1;
+      border-radius: 3px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .card-btn:hover         { background: var(--green-light); color: var(--green-dark); }
+    .card-btn.delete:hover  { background: #fde8e8; color: #c0392b; }
+
+    .sortable-ghost { opacity: 0.3; background: var(--green-light); }
+
+    /* ── Add card button ── */
+    .add-card-btn {
+      display: none;
+      align-items: center;
+      gap: 0.3rem;
+      width: 100%;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+      margin-top: auto;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    body.edit-mode .add-card-btn { display: flex; }
+    .add-card-btn:hover { border-color: var(--green); color: var(--green-dark); }
+
+    /* ── Loading ── */
+    #board-loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.hidden { display: none; }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+
+    .modal-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .modal-field { margin-bottom: 0.85rem; }
+
+    .modal-field label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-field input,
+    .modal-field textarea {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+    }
+    .modal-field input:focus,
+    .modal-field textarea:focus { border-color: var(--green); }
+    .modal-field textarea { resize: vertical; min-height: 80px; }
+
+    .modal-error {
+      font-size: 0.75rem;
+      color: #c0392b;
+      min-height: 1.2em;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary   { background: var(--green); color: var(--white); }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-secondary { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <img src="logo.png" alt="FPAmed" />
+    <span class="header-tag">Box Platform &middot; AI Workflows</span>
+  </div>
+</header>
+
+<div class="hero-strip">
+  <div class="hero-strip-inner">
+    <div>
+      <div class="eyebrow">Project Board</div>
+      <h1>Workflow Status &amp; Backlog</h1>
+    </div>
+    <div class="hero-meta">
+      <span>Updated: <span id="last-updated">&#8212;</span></span>
+      <button id="edit-toggle">Edit</button>
+      <span id="save-status"></span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="main-inner">
+    <a class="back-link" href="index.html">&#8592; Project Hub</a>
+    <div id="board"><div id="board-loading">Loading board&hellip;</div></div>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 <a href="https://fpamed.com/" target="_blank" rel="noopener">Forensic Psychiatric Associates, LP</a>
+</footer>
+
+<!-- Password modal -->
+<div id="pw-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">Enter edit password</div>
+    <div class="modal-field">
+      <input id="pw-input" type="password" placeholder="Password" autocomplete="off" />
+    </div>
+    <div class="modal-error" id="pw-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="pw-cancel">Cancel</button>
+      <button class="btn btn-primary"   id="pw-submit">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card edit/add modal -->
+<div id="card-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title" id="card-modal-title">Add card</div>
+    <div class="modal-field">
+      <label>Title</label>
+      <input id="card-title-input" type="text" placeholder="Card title" />
+    </div>
+    <div class="modal-field">
+      <label>Description (optional)</label>
+      <textarea id="card-body-input" placeholder="Short description&hellip;"></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Tag (optional)</label>
+      <input id="card-tag-input" type="text" placeholder="e.g. v2" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="card-cancel">Cancel</button>
+      <button class="btn btn-primary"   id="card-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://fpa-toolkit.up.railway.app';
+const KANBAN_URL = API_BASE + '/api/kanban';
+
+const EDIT_PASSWORD = 'fpamedit';
+const LS_AUTH_KEY   = 'kanban_auth';
+
+const LANES = [
+  { id: 'index',    label: 'Document Index', badge: 'live',       badgeText: 'Live · Beta' },
+  { id: 'depo',     label: 'Depo Summary',   badge: 'live',       badgeText: 'Live · Beta' },
+  { id: 'medchron', label: 'Med Chronology', badge: 'pre-launch', badgeText: 'Pre-Launch'       },
+];
+
+const STATUSES = [
+  { id: 'backlog',     label: 'Later'       },
+  { id: 'up-next',     label: 'Next'        },
+  { id: 'in-progress', label: 'In Progress' },
+  { id: 'live',        label: 'Done'        },
+];
+
+const SEED_CARDS = [
+  { id: 'seed-01', lane: 'index',    status: 'live',        title: 'Version 1',                      body: 'AI-extracted dates and descriptions for every PDF. Formatted Excel index filed back to Box automatically.',                                                          tag: '' },
+  { id: 'seed-02', lane: 'index',    status: 'up-next',     title: 'Document Classification',         body: 'Categorize docs by type (medical, legal, correspondence) so large case indexes are easier to navigate.',                                                           tag: '' },
+  { id: 'seed-03', lane: 'depo',     status: 'live',        title: 'Version 1',                      body: 'Topic detection, summaries, and legal significance tags. Excel and navigable PDF filed back to Box.',                                                              tag: '' },
+  { id: 'seed-04', lane: 'depo',     status: 'in-progress', title: '4-Up Condensed Transcript Fix',   body: 'PDF link navigation targets the correct testimony page within a condensed (4-up) transcript layout.',                                                             tag: '' },
+  { id: 'seed-05', lane: 'medchron', status: 'up-next',     title: 'Validation Spike',               body: 'Box AI against real medical records — confirming source material format and output requirements before building the pipeline.',                                 tag: '' },
+  { id: 'seed-06', lane: 'medchron', status: 'backlog',     title: 'Pipeline Design',                body: 'Architecture for multi-doc ingestion, OCR strategy, and output spec.',                                                                                             tag: '' },
+  { id: 'seed-07', lane: 'medchron', status: 'backlog',     title: 'Pipeline Testing',               body: 'Run tests on several multi-file inputs.',                                                                                                                          tag: '' },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+
+var cards     = [];
+var editMode  = false;
+var saveTimer = null;
+var sortables = [];
+
+var cardModalCtx = null; // { mode: 'add'|'edit', lane?, status?, id? }
+
+// ── DOM refs ───────────────────────────────────────────────────────────────
+
+var $board        = document.getElementById('board');
+var $lastUpdated  = document.getElementById('last-updated');
+var $editToggle   = document.getElementById('edit-toggle');
+var $saveStatus   = document.getElementById('save-status');
+
+var $pwModal  = document.getElementById('pw-modal');
+var $pwInput  = document.getElementById('pw-input');
+var $pwError  = document.getElementById('pw-error');
+var $pwCancel = document.getElementById('pw-cancel');
+var $pwSubmit = document.getElementById('pw-submit');
+
+var $cardModal      = document.getElementById('card-modal');
+var $cardModalTitle = document.getElementById('card-modal-title');
+var $cardTitleInput = document.getElementById('card-title-input');
+var $cardBodyInput  = document.getElementById('card-body-input');
+var $cardTagInput   = document.getElementById('card-tag-input');
+var $cardCancel     = document.getElementById('card-cancel');
+var $cardSave       = document.getElementById('card-save');
+
+// ── Init ───────────────────────────────────────────────────────────────────
+
+async function init() {
+  if (localStorage.getItem(LS_AUTH_KEY) === EDIT_PASSWORD) {
+    editMode = true;
+    document.body.classList.add('edit-mode');
+    $editToggle.textContent = 'Exit Edit';
+  }
+
+  try {
+    var res = await fetch(KANBAN_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+
+    if (data.cards && data.cards.length > 0) {
+      cards = data.cards;
+      if (data.updatedAt) $lastUpdated.textContent = fmtDate(data.updatedAt);
+    } else {
+      cards = SEED_CARDS.map(function(c) { return Object.assign({}, c); });
+      if (editMode) scheduleSave();
+    }
+  } catch (err) {
+    console.error('[kanban] fetch failed:', err);
+    cards = SEED_CARDS.map(function(c) { return Object.assign({}, c); });
+  }
+
+  renderBoard();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+
+function renderBoard() {
+  $board.innerHTML = '';
+
+  var lookup = {};
+  LANES.forEach(function(l) {
+    lookup[l.id] = {};
+    STATUSES.forEach(function(s) { lookup[l.id][s.id] = []; });
+  });
+  cards.forEach(function(c) {
+    if (lookup[c.lane] && lookup[c.lane][c.status]) lookup[c.lane][c.status].push(c);
+  });
+
+  // Header row
+  var headerRow = document.createElement('div');
+  headerRow.className = 'board-row board-header';
+  headerRow.innerHTML = '<div class="lane-label-header"></div>' +
+    STATUSES.map(function(s) { return '<div class="header-cell">' + s.label + '</div>'; }).join('');
+  $board.appendChild(headerRow);
+
+  // Swimlanes
+  LANES.forEach(function(lane) {
+    var row = document.createElement('div');
+    row.className = 'board-row swimlane' + (lane.badge === 'pre-launch' ? ' swimlane-pre-launch' : '');
+
+    var labelCell = document.createElement('div');
+    labelCell.className = 'lane-label-cell';
+    labelCell.innerHTML =
+      '<div class="lane-name">' + lane.label + '</div>' +
+      '<span class="lane-badge badge-' + lane.badge + '">' + lane.badgeText + '</span>';
+    row.appendChild(labelCell);
+
+    STATUSES.forEach(function(status) {
+      var cell = document.createElement('div');
+      cell.className = 'status-cell';
+      cell.dataset.lane   = lane.id;
+      cell.dataset.status = status.id;
+
+      var cellCards = (lookup[lane.id][status.id] || []).slice()
+        .sort(function(a, b) { return (a.position || 0) - (b.position || 0); });
+
+      cellCards.forEach(function(card) { cell.appendChild(buildCardEl(card)); });
+
+      var addBtn = document.createElement('button');
+      addBtn.className = 'add-card-btn';
+      addBtn.textContent = '+ Add card';
+      addBtn.addEventListener('click', function() { openCardModal('add', lane.id, status.id, null); });
+      cell.appendChild(addBtn);
+
+      row.appendChild(cell);
+    });
+
+    $board.appendChild(row);
+  });
+
+  if (editMode) attachSortables();
+}
+
+function buildCardEl(card) {
+  var el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.id = card.id;
+
+  el.innerHTML =
+    '<div class="card-actions">' +
+      '<button class="card-btn edit"   title="Edit"   data-id="' + card.id + '">&#9998;</button>' +
+      '<button class="card-btn delete" title="Delete" data-id="' + card.id + '">&#215;</button>'  +
+    '</div>' +
+    '<div class="card-title">' + esc(card.title) + '</div>' +
+    (card.body ? '<div class="card-body">' + esc(card.body) + '</div>' : '') +
+    (card.tag  ? '<span class="card-tag">' + esc(card.tag)  + '</span>' : '');
+
+  el.querySelector('.card-btn.edit').addEventListener('click', function(e) {
+    e.stopPropagation();
+    openCardModal('edit', null, null, card.id);
+  });
+  el.querySelector('.card-btn.delete').addEventListener('click', function(e) {
+    e.stopPropagation();
+    deleteCard(card.id);
+  });
+
+  return el;
+}
+
+// ── SortableJS ─────────────────────────────────────────────────────────────
+
+function attachSortables() {
+  sortables.forEach(function(s) { s.destroy(); });
+  sortables = [];
+  document.querySelectorAll('.status-cell').forEach(function(cell) {
+    var s = Sortable.create(cell, {
+      group:      'kanban',
+      animation:  150,
+      draggable:  '.card',
+      ghostClass: 'sortable-ghost',
+      onEnd:      function() { onBoardChange(); },
+    });
+    sortables.push(s);
+  });
+}
+
+function detachSortables() {
+  sortables.forEach(function(s) { s.destroy(); });
+  sortables = [];
+}
+
+// ── Board change after drag ────────────────────────────────────────────────
+
+function onBoardChange() {
+  var updated = [];
+  document.querySelectorAll('.status-cell').forEach(function(cell) {
+    var lane   = cell.dataset.lane;
+    var status = cell.dataset.status;
+    cell.querySelectorAll('.card[data-id]').forEach(function(el, idx) {
+      var existing = cards.find(function(c) { return c.id === el.dataset.id; });
+      if (existing) updated.push(Object.assign({}, existing, { lane: lane, status: status, position: idx }));
+    });
+  });
+  cards = updated;
+  scheduleSave();
+}
+
+// ── Card modal ─────────────────────────────────────────────────────────────
+
+function openCardModal(mode, lane, status, id) {
+  cardModalCtx = { mode: mode, lane: lane, status: status, id: id };
+  if (mode === 'add') {
+    $cardModalTitle.textContent = 'Add card';
+    $cardTitleInput.value = '';
+    $cardBodyInput.value  = '';
+    $cardTagInput.value   = '';
+  } else {
+    var card = cards.find(function(c) { return c.id === id; });
+    if (!card) return;
+    $cardModalTitle.textContent = 'Edit card';
+    $cardTitleInput.value = card.title;
+    $cardBodyInput.value  = card.body  || '';
+    $cardTagInput.value   = card.tag   || '';
+  }
+  $cardModal.classList.remove('hidden');
+  $cardTitleInput.focus();
+}
+
+function closeCardModal() {
+  $cardModal.classList.add('hidden');
+  cardModalCtx = null;
+}
+
+function commitCardModal() {
+  var title = $cardTitleInput.value.trim();
+  if (!title) { $cardTitleInput.focus(); return; }
+
+  var ctx = cardModalCtx;
+  if (ctx.mode === 'add') {
+    var id = 'card-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    var pos = cards.filter(function(c) { return c.lane === ctx.lane && c.status === ctx.status; }).length;
+    cards.push({ id: id, lane: ctx.lane, status: ctx.status, title: title, body: $cardBodyInput.value.trim(), tag: $cardTagInput.value.trim(), position: pos });
+  } else {
+    var card = cards.find(function(c) { return c.id === ctx.id; });
+    if (card) {
+      card.title = title;
+      card.body  = $cardBodyInput.value.trim();
+      card.tag   = $cardTagInput.value.trim();
+    }
+  }
+
+  closeCardModal();
+  renderBoard();
+  scheduleSave();
+}
+
+function deleteCard(id) {
+  cards = cards.filter(function(c) { return c.id !== id; });
+  var el = document.querySelector('.card[data-id="' + id + '"]');
+  if (el) el.remove();
+  scheduleSave();
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setSaveStatus('saving');
+  saveTimer = setTimeout(doSave, 800);
+}
+
+async function doSave() {
+  try {
+    var res = await fetch(KANBAN_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ password: EDIT_PASSWORD, cards: cards }),
+    });
+    if (!res.ok) {
+      var err = await res.json().catch(function() { return {}; });
+      throw new Error(err.error || 'HTTP ' + res.status);
+    }
+    setSaveStatus('saved');
+    $lastUpdated.textContent = fmtDate(new Date().toISOString());
+  } catch (err) {
+    console.error('[kanban] save failed:', err);
+    setSaveStatus('error');
+  }
+}
+
+function setSaveStatus(s) {
+  $saveStatus.className   = s;
+  $saveStatus.textContent = s === 'saving' ? 'Saving…' : s === 'saved' ? 'Saved' : s === 'error' ? 'Error' : '';
+}
+
+// ── Edit mode ──────────────────────────────────────────────────────────────
+
+$editToggle.addEventListener('click', function() {
+  if (editMode) {
+    exitEditMode();
+  } else {
+    $pwInput.value = '';
+    $pwError.textContent = '';
+    $pwModal.classList.remove('hidden');
+    $pwInput.focus();
+  }
+});
+
+function enterEditMode() {
+  editMode = true;
+  localStorage.setItem(LS_AUTH_KEY, EDIT_PASSWORD);
+  document.body.classList.add('edit-mode');
+  $editToggle.textContent = 'Exit Edit';
+  attachSortables();
+}
+
+function exitEditMode() {
+  editMode = false;
+  localStorage.removeItem(LS_AUTH_KEY);
+  document.body.classList.remove('edit-mode');
+  $editToggle.textContent = 'Edit';
+  detachSortables();
+}
+
+$pwCancel.addEventListener('click', function() { $pwModal.classList.add('hidden'); });
+$pwModal.addEventListener('click', function(e) { if (e.target === $pwModal) $pwModal.classList.add('hidden'); });
+$pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitPassword(); });
+$pwSubmit.addEventListener('click', submitPassword);
+
+function submitPassword() {
+  if ($pwInput.value === EDIT_PASSWORD) {
+    $pwModal.classList.add('hidden');
+    enterEditMode();
+  } else {
+    $pwError.textContent = 'Incorrect password.';
+    $pwInput.select();
+  }
+}
+
+$cardCancel.addEventListener('click', closeCardModal);
+$cardSave.addEventListener('click', commitCardModal);
+$cardTitleInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') commitCardModal(); });
+$cardModal.addEventListener('click', function(e) { if (e.target === $cardModal) closeCardModal(); });
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function fmtDate(iso) {
+  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  catch (_) { return iso; }
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Go ─────────────────────────────────────────────────────────────────────
+
+init();
+
+</script>
+</body>
+</html>
