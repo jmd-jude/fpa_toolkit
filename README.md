@@ -1,6 +1,6 @@
-# FPAmed Box Index Tool
+# Box.com Custom Workflow Management Toolkit
 
-A Next.js web app for FPAmed staff to generate formatted Excel reports from Box — document indexes for case folders and deposition summaries for transcript PDFs.
+A Next.js web app for users to generate formatted reports from Box — document indexes for case folders and deposition summaries for transcript PDFs.
 
 ## Pipelines
 

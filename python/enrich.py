@@ -44,12 +44,16 @@ FIELDS = [
         "description": (
             "A short label identifying what type of document this is. "
             "Maximum 20 words. Do not start with 'This document is' or 'This is'. "
-            "Write a noun phrase, not a full sentence."
+            "Write a noun phrase, not a full sentence. "
+            "If the document begins with a legal cover page such as a subpoena, deposition notice, or records request "
+            "followed by underlying medical, billing, or clinical records, describe the underlying records — not the cover page."
         ),
         "prompt": (
             "Identify what type of document this is in 20 words or fewer. "
             "Do not start with 'This document is' or 'This is'. "
-            "Write a noun phrase only — for example: 'Forensic mental health evaluation report for [Patient Name].'"
+            "Write a noun phrase only — for example: 'Forensic mental health evaluation report for [Patient Name].' "
+            "Important: if this document has a legal cover page (such as a subpoena, deposition notice, or records request) "
+            "followed by medical, billing, or clinical records, describe the underlying records — not the cover page."
         ),
     },
 ]

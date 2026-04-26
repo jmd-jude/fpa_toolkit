@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import csv
+import json
 import os
 import re
 from datetime import date
@@ -149,16 +150,27 @@ def derive_case_name(csv_path: str) -> str:
     return stem.replace('_', ' ').title()
 
 
+def derive_slug(transcript_path: str) -> str:
+    stem = os.path.splitext(os.path.basename(transcript_path))[0]
+    return re.sub(r'_transcript$', '', stem, flags=re.IGNORECASE)
+
+
 # ── PDF builder ────────────────────────────────────────────────────────────────
-def build_summary_pdf(topics: list, case_name: str):
+def build_summary_pdf(topics: list, case_name: str, page_map: dict = None):
     """
     Build the summary table PDF (without links yet — links are injected after
     the page count is known and the transcript is appended).
 
+    page_map: {transcript_page_int: {"pdf_page": int (0-based), "x": float, "y": float}}
+              If provided (condensed format), links use exact pdf_page + y coordinates.
+              If None/empty (uncondensed), links use arithmetic page mapping.
+
     Returns:
       (fitz.Document, link_records)
-      link_records: list of (page_idx_0based, fitz.Rect, phys_page_1based_in_transcript)
+      link_records: list of (summary_page_idx, fitz.Rect, target_pdf_page_0based, y_float)
     """
+    if page_map is None:
+        page_map = {}
     doc = fitz.open()
     link_records = []
 
@@ -245,7 +257,11 @@ def build_summary_pdf(topics: list, case_name: str):
         except (ValueError, TypeError):
             ps = 0
         if ps > 0:
-            link_records.append((len(doc) - 1, r_pg, ps))
+            if page_map and ps in page_map:
+                entry = page_map[ps]
+                link_records.append((len(doc) - 1, r_pg, entry["pdf_page"], entry["y"]))
+            else:
+                link_records.append((len(doc) - 1, r_pg, ps - 1, 0.0))
 
         # Subject cell
         if has_sig:
@@ -314,7 +330,16 @@ def main():
     case_name = args.case_name or derive_case_name(args.csv_path)
     print(f'Building summary table for: {case_name} ({len(topics)} topics)', flush=True)
 
-    summary_doc, link_records = build_summary_pdf(topics, case_name)
+    # Load page map for condensed transcripts (auto-detected by slug)
+    slug = derive_slug(args.transcript_path)
+    map_path = os.path.join(os.path.dirname(args.transcript_path), f"{slug}_page_map.json")
+    page_map = {}
+    if os.path.exists(map_path):
+        with open(map_path) as _f:
+            page_map = {int(k): v for k, v in json.load(_f).items()}
+        print(f'Condensed page map loaded: {len(page_map)} transcript pages', flush=True)
+
+    summary_doc, link_records = build_summary_pdf(topics, case_name, page_map)
     n_summary = len(summary_doc)
     print(f'Summary table: {n_summary} page(s)', flush=True)
 
@@ -327,15 +352,14 @@ def main():
     transcript_doc.close()
 
     # Inject GoTo link annotations into the summary pages
-    # Target page index in merged doc = (1-based physical page - 1) + n_summary
-    for page_idx, rect, phys_page in link_records:
-        dest = (phys_page - 1) + n_summary
+    for page_idx, rect, target_pdf_0idx, y in link_records:
+        dest = target_pdf_0idx + n_summary
         if dest < len(summary_doc):
             summary_doc[page_idx].insert_link({
                 'kind': fitz.LINK_GOTO,
                 'from': rect,
                 'page': dest,
-                'to': fitz.Point(0, 0),
+                'to': fitz.Point(0, y),
             })
 
     summary_doc.save(args.output_path, garbage=4, deflate=True)

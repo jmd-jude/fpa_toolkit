@@ -14,6 +14,7 @@ Usage:
 
 import argparse
 import csv
+import json
 import os
 import re
 import threading
@@ -156,6 +157,84 @@ FIELDS = [
         ),
     },
 ]
+
+
+def build_page_map(doc):
+    """
+    Scan every PDF page for 'Page N' sub-page header labels using word-level extraction.
+    Returns {transcript_page_num: {"pdf_page": int (0-based), "x": float, "y": float}}.
+    Uses position clustering to reject false positives (inline 'Page N' references in body text).
+    Returns empty dict for uncondensed transcripts (no consistent multi-label pattern).
+    """
+    all_labels = []
+    for page_idx in range(len(doc)):
+        words = doc[page_idx].get_text("words")
+        for i, w in enumerate(words):
+            if w[4].strip().lower() == "page" and i + 1 < len(words):
+                nxt = words[i + 1]
+                try:
+                    page_num = int(nxt[4].strip())
+                except ValueError:
+                    continue
+                all_labels.append({
+                    "transcript_page": page_num,
+                    "pdf_page": page_idx,
+                    "x": w[0],
+                    "y": w[1],
+                })
+
+    if not all_labels:
+        return {}
+
+    def top_clusters(vals, tol=15.0, top_n=2):
+        groups = []
+        for v in sorted(vals):
+            for g in groups:
+                if abs(v - g[0]) <= tol:
+                    g[1].append(v)
+                    g[0] = sum(g[1]) / len(g[1])
+                    break
+            else:
+                groups.append([v, [v]])
+        groups.sort(key=lambda g: -len(g[1]))
+        return [g[0] for g in groups[:top_n]]
+
+    canonical_y = top_clusters([lbl["y"] for lbl in all_labels])
+    canonical_x = top_clusters([lbl["x"] for lbl in all_labels])
+    tol = 15.0
+
+    page_map = {}
+    for lbl in all_labels:
+        if (any(abs(lbl["y"] - cy) <= tol for cy in canonical_y) and
+                any(abs(lbl["x"] - cx) <= tol for cx in canonical_x)):
+            tp = lbl["transcript_page"]
+            if tp not in page_map:  # first occurrence wins
+                page_map[tp] = {
+                    "pdf_page": lbl["pdf_page"],
+                    "x": lbl["x"],
+                    "y": lbl["y"],
+                }
+    return page_map
+
+
+def is_condensed(page_map, total_pdf_pages):
+    return total_pdf_pages > 0 and len(page_map) / total_pdf_pages > 1.5
+
+
+def build_inverse_map(page_map):
+    """
+    Build {pdf_page_0idx: {"first": int, "last": int}} from the page_map.
+    "first" and "last" are the first/last transcript page numbers on that PDF page.
+    """
+    inv = {}
+    for tp, entry in page_map.items():
+        pi = entry["pdf_page"]
+        if pi not in inv:
+            inv[pi] = {"first": tp, "last": tp}
+        else:
+            inv[pi]["first"] = min(inv[pi]["first"], tp)
+            inv[pi]["last"] = max(inv[pi]["last"], tp)
+    return inv
 
 
 def detect_testimony_start(doc):
@@ -354,6 +433,24 @@ def main():
         _f.write(pdf_bytes)
     print(f"Transcript PDF saved → {transcript_path}", flush=True)
 
+    # --- Condensed format detection ---
+    page_map = build_page_map(doc)
+    condensed = is_condensed(page_map, total_pages)
+    inverse_map = build_inverse_map(page_map) if condensed else {}
+    if condensed:
+        transcript_pages = sorted(page_map.keys())
+        print(
+            f"Condensed format detected: {len(page_map)} transcript pages "
+            f"({min(transcript_pages)}–{max(transcript_pages)}) across {total_pages} PDF pages",
+            flush=True,
+        )
+        map_path = os.path.join(args.output_dir, f"{slug}_page_map.json")
+        with open(map_path, "w") as _f:
+            json.dump({str(k): v for k, v in sorted(page_map.items())}, _f)
+        print(f"Page map saved → {map_path}", flush=True)
+    else:
+        print("Uncondensed format — standard page mapping.", flush=True)
+
     # --- Preamble skip ---
     if args.page_start is not None:
         page_start = max(1, args.page_start)
@@ -408,7 +505,16 @@ def main():
     ]
     topic_rows.sort(key=lambda r: r["page_num"])
     topic_rows = deduplicate_topics(topic_rows)
-    topic_rows = compute_page_ranges(topic_rows, page_end)
+
+    if condensed and inverse_map:
+        # Remap page_num from PDF-page (1-based) to first transcript page on that PDF page
+        last_transcript_page = max(page_map.keys())
+        for row in topic_rows:
+            pdf_0idx = row["page_num"] - 1
+            row["page_num"] = inverse_map.get(pdf_0idx, {}).get("first", row["page_num"])
+        topic_rows = compute_page_ranges(topic_rows, last_transcript_page)
+    else:
+        topic_rows = compute_page_ranges(topic_rows, page_end)
 
     failed_count = sum(1 for r in results if r.get("_failed"))
 

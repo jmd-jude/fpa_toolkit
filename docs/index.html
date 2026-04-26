@@ -7,91 +7,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="hub.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .header-inner   { max-width: 860px; }
+    .hero-strip-inner { max-width: 860px; }
 
-    :root {
-      --green:       #669966;
-      --green-dark:  #4f7a4f;
-      --green-light: #e8f0e8;
-      --text:        #1a1a1a;
-      --muted:       #666;
-      --border:      #d4e0d4;
-      --white:       #ffffff;
-      --bg:          #f5f7f5;
-      --dark:        #1a2a1a;
-    }
+    .sticky-top { position: sticky; top: 0; z-index: 100; }
 
-    body {
-      font-family: 'Open Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Header ── */
-    header {
-      background: var(--dark);
-      padding: 0 2rem;
-    }
-
-    .header-inner {
-      max-width: 860px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 0;
-    }
-
-    .header-inner img { height: 36px; width: auto; }
-
-    .header-tag {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-    }
-
-    /* ── Sticky top wrapper ── */
-    .sticky-top {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    /* ── Hero strip ── */
-    .hero-strip {
-      background: var(--dark);
-      border-bottom: 3px solid var(--green);
-      padding: 1.4rem 2rem 1.6rem;
-    }
-
-    .hero-strip-inner {
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    .eyebrow {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 0.5rem;
-    }
-
-    .hero-strip h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--white);
-      line-height: 1.2;
-      margin-bottom: 0.5rem;
-    }
-
+    .hero-strip h1 { margin-bottom: 0.5rem; }
     .hero-strip p {
       font-size: 0.97rem;
       font-weight: 300;
@@ -100,21 +23,9 @@
       max-width: 540px;
     }
 
-    /* ── Main layout ── */
-    main {
-      flex: 1;
-      padding: 3rem 2rem 4rem;
-    }
+    main { padding: 3rem 2rem 4rem; }
+    .main-inner { max-width: 860px; display: flex; flex-direction: column; gap: 3rem; }
 
-    .main-inner {
-      max-width: 860px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 3rem;
-    }
-
-    /* ── Section label ── */
     .section-label {
       font-size: 0.65rem;
       font-weight: 700;
@@ -124,15 +35,8 @@
       margin-bottom: 1.1rem;
     }
 
-    /* ── App preview ── */
-    .app-block {
-      display: flex;
-      gap: 2.5rem;
-      align-items: flex-start;
-    }
-
-    .app-text { flex: 1; padding-top: 0.25rem; }
-
+    .app-block { display: flex; gap: 2.5rem; align-items: flex-start; }
+    .app-text  { flex: 1; padding-top: 0.25rem; }
     .app-text h2 {
       font-size: 1.3rem;
       font-weight: 700;
@@ -140,14 +44,7 @@
       margin-bottom: 0.6rem;
       line-height: 1.25;
     }
-
-    .app-text p {
-      font-size: 0.9rem;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 1.4rem;
-    }
-
+    .app-text p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.4rem; }
     .app-link {
       display: inline-block;
       background: var(--green);
@@ -160,11 +57,7 @@
       letter-spacing: 0.01em;
       transition: background 0.15s, box-shadow 0.15s;
     }
-    .app-link:hover {
-      background: var(--green-dark);
-      box-shadow: 0 4px 14px rgba(102,153,102,0.35);
-    }
-
+    .app-link:hover { background: var(--green-dark); box-shadow: 0 4px 14px rgba(102,153,102,0.35); }
     .app-preview {
       flex: 1.3;
       border-radius: 10px;
@@ -175,31 +68,17 @@
       display: block;
       transition: box-shadow 0.15s, transform 0.15s;
     }
-    .app-preview:hover {
-      box-shadow: 0 10px 32px rgba(0,0,0,0.14);
-      transform: translateY(-2px);
-    }
-    .app-preview img {
-      width: 100%;
-      display: block;
-    }
+    .app-preview:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.14); transform: translateY(-2px); }
+    .app-preview img  { width: 100%; display: block; }
 
-    /* ── Workflow cards ── */
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1.1rem;
-    }
-
+    .workflow-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; }
     .wf-card {
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 1.4rem 1.5rem;
     }
-
     .wf-card.dim { opacity: 0.4; }
-
     .wf-num {
       font-size: 0.62rem;
       font-weight: 700;
@@ -208,20 +87,8 @@
       color: var(--green);
       margin-bottom: 0.45rem;
     }
-
-    .wf-card h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.4rem;
-    }
-
-    .wf-card p {
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
+    .wf-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+    .wf-card p  { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
     .wf-badge {
       margin-top: 0.9rem;
       display: inline-block;
@@ -232,23 +99,10 @@
       padding: 0.2rem 0.6rem;
       border-radius: 20px;
     }
-    .badge-live {
-      background: var(--green);
-      color: var(--white);
-    }
-    .badge-next {
-      background: var(--green-light);
-      color: var(--green-dark);
-      border: 1px solid var(--border);
-    }
+    .badge-live { background: var(--green); color: var(--white); }
+    .badge-next { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--border); }
 
-    /* ── Updates list ── */
-    .update-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
+    .update-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .update-item {
       background: var(--white);
       border: 1px solid var(--border);
@@ -261,11 +115,7 @@
       color: inherit;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .update-item:hover {
-      border-color: var(--green);
-      box-shadow: 0 2px 10px rgba(102,153,102,0.12);
-    }
-
+    .update-item:hover { border-color: var(--green); box-shadow: 0 2px 10px rgba(102,153,102,0.12); }
     .update-date {
       font-size: 0.7rem;
       font-weight: 700;
@@ -275,39 +125,10 @@
       width: 5.5rem;
       flex-shrink: 0;
     }
-
-    .update-title {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .update-sub {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-    }
-
-    .update-arrow {
-      margin-left: auto;
-      color: var(--border);
-      font-size: 1rem;
-      flex-shrink: 0;
-      transition: color 0.15s;
-    }
+    .update-title { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+    .update-sub   { font-size: 0.8rem; color: var(--muted); margin-top: 0.15rem; }
+    .update-arrow { margin-left: auto; color: var(--border); font-size: 1rem; flex-shrink: 0; transition: color 0.15s; }
     .update-item:hover .update-arrow { color: var(--green); }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 1.4rem 2rem;
-      font-size: 0.75rem;
-      color: #aaa;
-      border-top: 1px solid var(--border);
-      background: var(--white);
-    }
-    footer a { color: var(--green); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
 
     @media (max-width: 680px) {
       .app-block { flex-direction: column-reverse; }
@@ -337,6 +158,21 @@
 
   <main>
     <div class="main-inner">
+
+      <!-- Roadmap -->
+      <section>
+        <div class="section-label">Roadmap</div>
+        <div class="update-list">
+          <a class="update-item" href="roadmap.html">
+            <span class="update-date" style="color: var(--green);">Live</span>
+            <div>
+              <div class="update-title">Project Board</div>
+              <div class="update-sub">Workflow status, in-flight items, and backlog across all three tracks</div>
+            </div>
+            <span class="update-arrow">&#8594;</span>
+          </a>
+        </div>
+      </section>
 
       <!-- Updates -->
       <section>

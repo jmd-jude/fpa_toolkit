@@ -105,7 +105,20 @@ async function runJob(
       });
     }
 
-    // Step 3 — report
+    // Step 3 — persist to DB (non-fatal)
+    const summaryFile = path.join(tmpDir, `${slug}_summary.csv`);
+    try {
+      await runPython(pythonBin, [
+        path.join(pythonDir, 'db_persist.py'),
+        '--job-id', jobId,
+        '--manifest-file', path.join(tmpDir, manifestFile),
+        '--summary-file', summaryFile,
+      ], (line) => { if (line.trim()) appendLog(jobId, line.trim()); });
+    } catch (err) {
+      appendLog(jobId, `db_persist warning: ${String(err)}`);
+    }
+
+    // Step 5 — report
     updateJob(jobId, { progress: 'Generating Excel report...' });
     await runPython(pythonBin, [
       path.join(pythonDir, 'report.py'),
@@ -115,7 +128,7 @@ async function runJob(
       if (line.trim()) appendLog(jobId, line.trim());
     });
 
-    // Step 4 — upload to Box
+    // Step 6 — upload to Box
     updateJob(jobId, { progress: 'Uploading report to Box...' });
     const dateStamp = new Date().toISOString().slice(0, 10);
     const uploadName = `${folderName}_index_${dateStamp}.xlsx`;

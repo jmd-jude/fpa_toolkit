@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPAmed — Project Roadmap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #669966;
+      --green-dark:  #4f7a4f;
+      --green-light: #e8f0e8;
+      --text:        #1a1a1a;
+      --muted:       #666;
+      --border:      #d4e0d4;
+      --white:       #ffffff;
+      --bg:          #f5f7f5;
+      --dark:        #1a2a1a;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header { background: var(--dark); padding: 0 2rem; }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+    }
+
+    .header-inner img { height: 36px; width: auto; }
+
+    .header-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* ── Hero strip ── */
+    .hero-strip {
+      background: var(--dark);
+      border-bottom: 3px solid var(--green);
+      padding: 1.4rem 2rem 1.6rem;
+    }
+
+    .hero-strip-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .eyebrow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-strip h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .hero-meta {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding-bottom: 0.35rem;
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .main-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--green-dark);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Board container ── */
+    #board { overflow-x: auto; }
+
+    /* Every row (header + swimlanes) shares the same column grid */
+    .board-row {
+      display: grid;
+      grid-template-columns: 145px repeat(4, 1fr);
+      min-width: 720px;
+    }
+
+    /* ── Column header row ── */
+    .board-header {
+      background: var(--dark);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .lane-label-header { /* blank top-left cell */ }
+
+    .header-cell {
+      padding: 0.8rem 1rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      border-left: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── Swimlane rows ── */
+    .swimlane {
+      border-left:   1px solid var(--border);
+      border-right:  1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .swimlane:last-child { border-radius: 0 0 10px 10px; }
+
+    /* Lane label cell (leftmost) */
+    .lane-label-cell {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      justify-content: flex-start;
+    }
+
+    .lane-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .lane-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .badge-live       { background: var(--green); color: var(--white); }
+    .badge-pre-launch { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--border); }
+
+    /* Status cells */
+    .status-cell {
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      padding: 0.85rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 80px;
+    }
+
+    /* Pre-launch swimlane: dim the label to signal not-yet-live */
+    .swimlane-pre-launch .lane-label-cell { opacity: 0.65; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 0.95rem;
+    }
+
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .card-body {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-top: 0.35rem;
+    }
+
+    .card-tag {
+      display: inline-block;
+      margin-top: 0.55rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.4rem 2rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+    }
+    footer a { color: var(--green); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <img src="logo.png" alt="FPAmed" />
+      <span class="header-tag">Box Platform &middot; AI Workflows</span>
+    </div>
+  </header>
+
+  <div class="hero-strip">
+    <div class="hero-strip-inner">
+      <div>
+        <div class="eyebrow">Project Roadmap</div>
+        <h1>Workflow Status &amp; Backlog</h1>
+      </div>
+      <div class="hero-meta">Updated: <span id="last-updated"></span></div>
+    </div>
+  </div>
+
+  <main>
+    <div class="main-inner">
+      <a class="back-link" href="index.html">&#8592; Project Hub</a>
+      <div id="board"></div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 <a href="https://fpamed.com/" target="_blank" rel="noopener">Forensic Psychiatric Associates, LP</a>
+  </footer>
+
+<script>
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MAINTENANCE — edit below to update the board
+//
+//  Quick reference:
+//    • Set LAST_UPDATED to today's date each time you make a change.
+//    • Edit CARDS to add, move, or remove items.
+//
+//  To ADD a card:    Copy any card object and edit the fields.
+//  To MOVE a card:   Change its `status` value.
+//  To REMOVE a card: Delete the object (including the trailing comma).
+//
+//  lane options:    "index" | "depo" | "medchron"
+//  status options:  "backlog" | "up-next" | "in-flight" | "live"
+//  tag is optional — use "" to show no tag on a card.
+// ════════════════════════════════════════════════════════════════════════════
+
+const LAST_UPDATED = "Apr 24, 2026";
+
+const CARDS = [
+
+  // ── Document Index ──────────────────────────────────────────────────────
+  {
+    lane:   "index",
+    status: "live",
+    title:  "Version 1",
+    body:   "AI-extracted dates and descriptions for every PDF. Formatted Excel index filed back to Box automatically.",
+    tag:    ""
+  },
+  {
+    lane:   "index",
+    status: "up-next",
+    title:  "Document Classification",
+    body:   "Categorize docs by type (medical, legal, correspondence) so large case indexes are easier to navigate.",
+    tag:    ""
+  },
+
+  // ── Deposition Summary ───────────────────────────────────────────────────
+  {
+    lane:   "depo",
+    status: "live",
+    title:  "Version 1",
+    body:   "Topic detection, summaries, and legal significance tags. Excel and navigable PDF filed back to Box.",
+    tag:    ""
+  },
+  {
+    lane:   "depo",
+    status: "in-flight",
+    title:  "4-Up Condensed Transcript Fix",
+    body:   "PDF link navigation targets the correct testimony page within a condensed (4-up) transcript layout.",
+    tag:    ""
+  },
+
+  // ── Medical Chronology ───────────────────────────────────────────────────
+  {
+    lane:   "medchron",
+    status: "up-next",
+    title:  "Validation Spike",
+    body:   "Box AI against real medical records — confirming source material format and output requirements before building the pipeline.",
+    tag:    ""
+  },
+  {
+    lane:   "medchron",
+    status: "backlog",
+    title:  "Pipeline Design",
+    body:   "Architecture for multi-doc ingestion, OCR strategy, and output spec.",
+    tag:    ""
+  },
+  {
+    lane:   "medchron",
+    status: "backlog",
+    title:  "Pipeline Testing",
+    body:   "Run tests on several muli-file inputs",
+    tag:    ""
+  },
+
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+//  END OF MAINTENANCE AREA — do not edit below this line
+// ════════════════════════════════════════════════════════════════════════════
+
+const LANES = [
+  { id: "index",    label: "Document Index",  badge: "live",       badgeText: "Live · Beta" },
+  { id: "depo",     label: "Depo Summary",     badge: "live",       badgeText: "Live · Beta" },
+  { id: "medchron", label: "Med Chronology",   badge: "pre-launch", badgeText: "Pre-Launch"  },
+];
+
+const STATUSES = [
+  { id: "backlog",   label: "Later"     },
+  { id: "up-next",   label: "Next"     },
+  { id: "in-flight", label: "In Progress" },
+  { id: "live",      label: "Done"        },
+];
+
+// Inject last-updated into the hero strip
+document.getElementById('last-updated').textContent = LAST_UPDATED;
+
+// Build card lookup: lane → status → Card[]
+const lookup = {};
+LANES.forEach(l => {
+  lookup[l.id] = {};
+  STATUSES.forEach(s => { lookup[l.id][s.id] = []; });
+});
+CARDS.forEach(c => {
+  if (lookup[c.lane]?.[c.status]) lookup[c.lane][c.status].push(c);
+});
+
+const board = document.getElementById('board');
+
+// Column header row
+const headerRow = document.createElement('div');
+headerRow.className = 'board-row board-header';
+headerRow.innerHTML =
+  '<div class="lane-label-header"></div>' +
+  STATUSES.map(s => `<div class="header-cell">${s.label}</div>`).join('');
+board.appendChild(headerRow);
+
+// Swimlane rows
+LANES.forEach(lane => {
+  const row = document.createElement('div');
+  row.className = 'board-row swimlane' + (lane.badge === 'pre-launch' ? ' swimlane-pre-launch' : '');
+
+  // Lane label cell
+  const labelCell = document.createElement('div');
+  labelCell.className = 'lane-label-cell';
+  labelCell.innerHTML =
+    `<div class="lane-name">${lane.label}</div>` +
+    `<span class="lane-badge badge-${lane.badge}">${lane.badgeText}</span>`;
+  row.appendChild(labelCell);
+
+  // One status cell per column
+  STATUSES.forEach(status => {
+    const cell = document.createElement('div');
+    cell.className = 'status-cell';
+
+    lookup[lane.id][status.id].forEach(card => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML =
+        `<div class="card-title">${card.title}</div>` +
+        (card.body ? `<div class="card-body">${card.body}</div>` : '') +
+        (card.tag  ? `<span class="card-tag">${card.tag}</span>` : '');
+      cell.appendChild(el);
+    });
+
+    row.appendChild(cell);
+  });
+
+  board.appendChild(row);
+});
+
+</script>
+</body>
+</html>

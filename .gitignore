@@ -22,3 +22,6 @@ __pycache__/
 *.csv
 /PRDs
 /product-docs
+/sql
+/scripts
+/llms
