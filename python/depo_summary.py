@@ -318,7 +318,13 @@ def process_page(token: str, file_id: str, page_num: int, model: str,
             return result
         except requests.exceptions.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"
-            last_err = f"HTTP {status}"
+            box_code = ""
+            if e.response is not None:
+                try:
+                    box_code = e.response.json().get("code", "")
+                except Exception:
+                    pass
+            last_err = f"HTTP {status}" + (f" ({box_code})" if box_code else "")
             if e.response is not None and e.response.status_code == 429:
                 wait = 10 * attempt
                 print(

@@ -3,8 +3,8 @@ import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { sessionOptions, SessionData } from '@/lib/session';
 import { getFreshToken, uploadToBox } from '@/lib/box';
-import { createJob, updateJob, appendLog } from '@/lib/jobs';
-import { recordUsage } from '@/lib/usage';
+import { createJob, getJob, updateJob, appendLog } from '@/lib/jobs';
+import { recordUsage, insertJobRecord, updateJobRecord } from '@/lib/usage';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import os from 'os';
@@ -68,6 +68,7 @@ async function runJob(
 ) {
   updateJob(jobId, { status: 'running', progress: 'Detecting testimony pages...' });
   const startedAt = Date.now();
+  insertJobRecord(jobId, userEmail ?? '', 'deposition_summary', fileName, fileId);
 
   const tmpDir = path.join(os.tmpdir(), `box-depo-${jobId}`);
   await fs.mkdir(tmpDir, { recursive: true });
@@ -148,22 +149,26 @@ async function runJob(
       pdfBuffer,
     );
 
-    const durationSeconds = Math.round((Date.now() - startedAt) / 1000);
+    const completedAt = new Date();
+    const durationMs = Date.now() - startedAt;
+    const durationSeconds = Math.round(durationMs / 1000);
     updateJob(jobId, {
       status: 'complete',
-      completedAt: new Date().toISOString(),
+      completedAt: completedAt.toISOString(),
       boxFileUrl,
       boxPdfUrl,
       progress: 'Done',
     });
-    await recordUsage({
-      jobId,
-      pipeline: 'deposition_summary',
-      fileName,
-      pagesProcessed,
-      durationSeconds,
-      userEmail,
-    });
+    await Promise.allSettled([
+      recordUsage({ jobId, pipeline: 'deposition_summary', fileName, pagesProcessed, durationSeconds, userEmail }),
+      updateJobRecord(jobId, 'complete', getJob(jobId)?.log ?? [], completedAt, durationMs),
+    ]);
+  } catch (err) {
+    const completedAt = new Date();
+    const durationMs = Date.now() - startedAt;
+    const job = getJob(jobId);
+    updateJobRecord(jobId, 'error', job?.log ?? [], completedAt, durationMs, String(err));
+    throw err;
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
