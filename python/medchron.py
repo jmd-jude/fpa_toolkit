@@ -46,43 +46,74 @@ IMAGE_CHAR_THRESHOLD = 50
 
 BOX_API = "https://api.box.com/2.0"
 BOX_UPLOAD = "https://upload.box.com/api/2.0"
-BOX_AI_TEXT_GEN = f"{BOX_API}/ai/text_gen"
+BOX_AI_EXTRACT = "https://api.box.com/2.0/ai/extract_structured"
 BOX_AI_MODEL = os.environ.get("BOX_AI_MODEL", "google__gemini_2_5_pro")
 SCRATCH_FOLDER_NAME = "__medchron_chunks__"
 
-_ANCHOR_PROMPT = """\
-You are a medical records analyst extracting a medical chronology.
-
-You are looking at a {window_span}-page window extracted from "{source_file_name}".
-Page {anchor_pos} of this window is the ANCHOR PAGE — it corresponds to page {anchor_page} of the source record.
-{context_desc}
-
-Extract every clinically significant event that BEGINS on the anchor page (page {anchor_pos} of this window). \
-Use the surrounding context pages to understand continuity and fill in details (such as provider name or date \
-that may appear only on the preceding page), but do not extract events that started before the anchor page.
-
-Return ONLY a JSON array (no explanation, no markdown fences). Each element must have:
-- "event_date": string YYYY-MM-DD, date the event occurred (required)
-- "event_date_is_range": boolean, true if the entry spans multiple dates (e.g. a hospital stay)
-- "event_date_end": string YYYY-MM-DD or null, end date when event_date_is_range is true
-- "event_time": string or null, time of day as shown e.g. "10:32"
-- "provider": string or null, provider name and credentials e.g. "Peter Remedios, M.D."
-- "facility": string or null, clinic or hospital name
-- "medical_information": string, faithful structured summary of clinical content; \
-preserve labeled sections (Subjective, Objective, Assessment, Plan) when present
-- "is_clinically_significant": boolean
-
-Clinically significant events include: encounters, diagnoses, procedures, labs with abnormal values, \
-imaging findings, surgeries, medication changes, hospital admissions/discharges, physical exam findings, \
-ED visits, and consultations.
-
-Return [] if the anchor page contains no clinically significant content that begins here. This includes:
-- Blank pages, tables of contents, fax headers, cover sheets
-- Affidavits, custodian of records declarations, release of medical information forms, authorization forms
-- Any page consisting primarily of legal or administrative language rather than clinical documentation
-- Continuation pages where the clinical event started on a preceding page
-
-Return ONLY the JSON array. No text before or after it."""
+_EXTRACT_FIELDS = [
+    {
+        "key": "is_clinical_page",
+        "type": "string",
+        "description": (
+            "Classify this content: 'clinical' if it contains clinical encounter documentation "
+            "(SOAP notes, diagnoses, procedures, lab results, imaging, medications, hospital "
+            "admission or discharge notes); 'administrative' if it contains primarily "
+            "administrative content (intake forms, ICD code tables, authorization forms, "
+            "affidavits, legal documents, custodian of records declarations); 'image' if the "
+            "page appears to be a scanned image with no readable text."
+        ),
+        "prompt": (
+            "Is this page primarily clinical documentation, administrative content, "
+            "or a scanned image with no readable text? Reply with one word: clinical, "
+            "administrative, or image."
+        ),
+    },
+    {
+        "key": "event_date",
+        "type": "date",
+        "description": (
+            "The date on which the clinical event described here occurred. "
+            "Leave empty if no clinical event date is present."
+        ),
+    },
+    {
+        "key": "event_date_is_range",
+        "type": "string",
+        "description": "true if the event spans multiple dates (e.g. a hospital stay), false otherwise.",
+    },
+    {
+        "key": "event_date_end",
+        "type": "date",
+        "description": "End date of the event if event_date_is_range is true. Leave empty otherwise.",
+    },
+    {
+        "key": "event_time",
+        "type": "string",
+        "description": "Time of day as shown on the record, e.g. '10:32'. Leave empty if not present.",
+    },
+    {
+        "key": "provider",
+        "type": "string",
+        "description": (
+            "The attending or treating provider name and credentials, "
+            "e.g. 'Peter Remedios, M.D.'. Empty if not present."
+        ),
+    },
+    {
+        "key": "facility",
+        "type": "string",
+        "description": "The clinic or hospital name where the event occurred. Empty if not present.",
+    },
+    {
+        "key": "medical_information",
+        "type": "string",
+        "description": (
+            "Faithful summary of the clinical content on these pages. "
+            "Preserve labeled sections (Subjective, Objective, Assessment, Plan) when present. "
+            "Empty if no clinical content is present on these pages."
+        ),
+    },
+]
 
 
 # ---------------------------------------------------------------------------
@@ -204,71 +235,61 @@ def delete_box_file(session: requests.Session, file_id: str) -> None:
 # Box AI extraction
 # ---------------------------------------------------------------------------
 
-def extract_anchor(
+def extract_anchor_structured(
     session: requests.Session,
     window_file_id: str,
     source_file_id: str,
     source_file_name: str,
     anchor_page: int,
-    anchor_pos: int,
-    window_span: int,
-) -> list[ChronologyEntry]:
-    if window_span == 1:
-        context_desc = "There are no context pages."
-    elif anchor_pos == 1:
-        context_desc = "Page 2 is context only (the following source page). There is no preceding page."
-    elif anchor_pos == window_span:
-        context_desc = "Page 1 is context only (the preceding source page). There is no following page."
-    else:
-        context_desc = "Pages 1 and 3 are context only (the preceding and following source pages)."
+) -> list[ChronologyEntry] | None:
+    """
+    Returns list[ChronologyEntry] on success (may be empty if non-clinical),
+    or None on API error (caller should mark page as failed).
+    """
+    payload = {
+        "items": [{"type": "file", "id": window_file_id}],
+        "fields": _EXTRACT_FIELDS,
+        "ai_agent": {
+            "type": "ai_agent_extract_structured",
+            "long_text": {"model": BOX_AI_MODEL},
+        },
+    }
 
-    base_prompt = _ANCHOR_PROMPT.format(
-        window_span=window_span,
-        source_file_name=source_file_name,
-        anchor_pos=anchor_pos,
-        anchor_page=anchor_page,
-        context_desc=context_desc,
-    )
-    prompt = base_prompt
-
-    last_err: str = "unknown"
+    last_err = "unknown"
     for attempt in range(1, 4):
-        payload = {
-            "items": [{"type": "file", "id": window_file_id}],
-            "prompt": prompt,
-            "ai_agent": {
-                "type": "ai_agent_text_gen",
-                "basic_gen": {"model": BOX_AI_MODEL},
-            },
-        }
         try:
-            r = session.post(BOX_AI_TEXT_GEN, json=payload, timeout=180)
+            r = session.post(BOX_AI_EXTRACT, json=payload, timeout=180)
             r.raise_for_status()
-            raw = r.json().get("answer", "").strip()
-            if raw.startswith("```"):
-                raw = raw.split("\n", 1)[-1]
-                raw = raw.rsplit("```", 1)[0].strip()
-            events = json.loads(raw)
-            entries: list[ChronologyEntry] = []
-            for ev in events:
-                if not ev.get("is_clinically_significant", True):
-                    continue
-                entries.append(ChronologyEntry(
-                    event_date=ev["event_date"],
-                    event_date_is_range=ev.get("event_date_is_range", False),
-                    event_date_end=ev.get("event_date_end"),
-                    event_time=ev.get("event_time"),
-                    provider=ev.get("provider"),
-                    facility=ev.get("facility"),
-                    medical_information=ev["medical_information"],
-                    first_page=anchor_page,
-                    last_page=anchor_page,
-                    source_file_id=source_file_id,
-                    source_file_name=source_file_name,
-                    is_clinically_significant=True,
-                    ai_confidence=float(ev.get("ai_confidence", 1.0)),
-                ))
-            return entries
+            answer = r.json().get("answer", {})
+
+            classification = (answer.get("is_clinical_page") or "").strip().lower()
+            if classification != "clinical":
+                return []
+
+            event_date = answer.get("event_date")
+            medical_info = (answer.get("medical_information") or "").strip()
+            if not event_date or not medical_info:
+                return []
+
+            is_range_raw = str(answer.get("event_date_is_range") or "").lower()
+            is_range = is_range_raw in ("true", "yes", "1")
+
+            entry = ChronologyEntry(
+                event_date=event_date,
+                event_date_is_range=is_range,
+                event_date_end=answer.get("event_date_end") or None,
+                event_time=answer.get("event_time") or None,
+                provider=answer.get("provider") or None,
+                facility=answer.get("facility") or None,
+                medical_information=medical_info,
+                first_page=anchor_page,
+                last_page=anchor_page,
+                source_file_id=source_file_id,
+                source_file_name=source_file_name,
+                is_clinically_significant=True,
+                ai_confidence=1.0,
+            )
+            return [entry]
 
         except requests.exceptions.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"
@@ -280,14 +301,6 @@ def extract_anchor(
             else:
                 break
 
-        except (json.JSONDecodeError, ValueError) as e:
-            last_err = f"parse error: {e}"
-            if attempt < 3:
-                prompt = base_prompt + "\n\nReturn ONLY a valid JSON array. No text before or after."
-                time.sleep(2)
-            else:
-                break
-
         except requests.exceptions.Timeout:
             last_err = "timeout"
             time.sleep(5 * attempt)
@@ -296,7 +309,7 @@ def extract_anchor(
             last_err = str(e)
             break
 
-    raise RuntimeError(last_err)
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -348,7 +361,6 @@ def process_file(
         if anchor > 1:
             window_pages.append(anchor - 1)
         window_pages.append(anchor)
-        anchor_pos = len(window_pages)
         if anchor < total_pages:
             window_pages.append(anchor + 1)
 
@@ -358,16 +370,16 @@ def process_file(
         window_file_id = None
         try:
             window_file_id = upload_chunk(session, scratch_folder_id, window_path)
-            page_entries = extract_anchor(
+            result = extract_anchor_structured(
                 session, window_file_id,
                 file_id, file_name,
                 anchor_page=anchor,
-                anchor_pos=anchor_pos,
-                window_span=len(window_pages),
             )
-            entries.extend(page_entries)
+            if result is None:
+                raise RuntimeError("extraction failed")
+            entries.extend(result)
             cov.mark_processed(anchor, anchor)
-            print(f"{len(page_entries)} event(s)", flush=True)
+            print(f"{len(result)} event(s)", flush=True)
         except Exception as e:
             print(f"FAILED ({e})", flush=True)
             cov.mark_failed(anchor, anchor, str(e))
